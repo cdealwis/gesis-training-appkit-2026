@@ -1,5 +1,5 @@
 GET DATA /TYPE=TXT
-/FILE='./entry survey.csv'
+/FILE='./survey_name_1.csv'
 /ENCODING='UTF8'
 /ARRANGEMENT=DELIMITED
 /FIRSTCASE=2
@@ -8,11 +8,21 @@ GET DATA /TYPE=TXT
 /DELCASE=LINE
 /VARIABLES=personalParticipantCode A15
 generalLoginCode A15
+status A11
+lastStatusChange A32
+note A500
+firstOpened A32
 committed A32
 scheduled A32
+expired A32
 published A32
+exported A32
 osVersion A15
 smartphoneType A32
+pushNotificationAllowed A15
+notificationType A15
+notificationTitle A50
+notificationText A150
 aim01 F1
 aim02 F1
 aim03 F1
@@ -45,15 +55,35 @@ VARIABLE LABELS personalParticipantCode 'PersonalParticipantCode'.
 
 VARIABLE LABELS generalLoginCode 'GeneralLoginCode'.
 
+VARIABLE LABELS status 'Participant Status'.
+
+VARIABLE LABELS lastStatusChange 'Last Status Change'.
+
+VARIABLE LABELS note 'Note'.
+
+VARIABLE LABELS firstOpened 'First Opened'.
+
 VARIABLE LABELS committed 'Committed'.
 
 VARIABLE LABELS scheduled 'Scheduled'.
 
+VARIABLE LABELS expired 'Expired'.
+
 VARIABLE LABELS published 'Published'.
+
+VARIABLE LABELS exported 'Exported'.
 
 VARIABLE LABELS osVersion 'OS Version'.
 
 VARIABLE LABELS smartphoneType 'SmartphoneType'.
+
+VARIABLE LABELS pushNotificationAllowed 'Push Notification Allowed'.
+
+VARIABLE LABELS notificationType 'Notification Type'.
+
+VARIABLE LABELS notificationTitle 'Notification Title'.
+
+VARIABLE LABELS notificationText 'Notification Text'.
 
 VARIABLE LABELS aim01 'When I feel happiness, it is a quite type of contentment.'.
 ADD VALUE LABELS aim01

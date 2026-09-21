@@ -65,7 +65,7 @@ Participants were compensated per completed survey, which we will use later to c
 
 ## Setup
 
-In order to run the code in this notebook, you need to install and load the following packages:
+In order to run the code in this notebook, you need to install and load the following packages. The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package is not yet available on CRAN, so we install it from GitLab using the `remotes` package:
 
 ```{r, include=TRUE, echo=TRUE, output=FALSE, message=FALSE, warning=FALSE}
 # List of required packages
@@ -92,40 +92,53 @@ for (package in packages) {
 
 }
 
+# appkitr is not on CRAN yet: install the latest release from GitLab if missing
+if (!require("appkitr", quietly = TRUE)) {
+  if (!require("remotes", quietly = TRUE)) {
+    install.packages("remotes", repos = "https://cloud.r-project.org/")
+  }
+  remotes::install_url("https://gitlab.com/gesis-appkit/appkitr/-/releases/permalink/latest/downloads/appkitr.tar.gz")
+  library(appkitr)
+}
+
 message("All required packages are now installed and loaded")
-```
-
-We will also load some convenience functions tailored to working with GESIS AppKit data. If you want to check out the code, you can find it in the `appkit_helpers.R` file.
-
-```{r, include=TRUE, echo=TRUE, message=FALSE}
-source("appkit_helpers.R")
 ```
 
 ## Importing and auto-formatting data
 
-With the helper functions loaded, we can go ahead and use them to import the data.
+The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package reads survey exports from the GESIS AppKit and takes care of the formatting for you. An export consists of a `.csv` file with the responses and an `.sps` (SPSS syntax) file with the variable and value labels. `read_appkit_survey()` reads one such survey from a directory, converts timestamps and logical variables, sets specified values (by default `-1`, empty strings, `"Not applicable"` and `"N/A"`) to `NA`, and attaches the labels from the `.sps` file.
 
-The data are being read from the `data` folder. The `read_appkit_surveys()` function will automatically read all `.csv` files in the specified folder and combine them into a single data frame. The resulting data frame will contain all the survey responses, including the metadata (e.g., participant ID, survey ID, etc.) and the actual survey responses.
+To try this out, the `data/example_survey` folder contains one small example survey:
 
 ```{r}
-surveys <- read_appkit_surveys('data', na_value = -1)
+survey <- read_appkit_survey("data/example_survey")
 ```
 
-Let's take a look at the survey contained in the `surveys` list.
+The variable labels are stored as attributes and the value labels as factor levels:
 
 ```{r}
-# Check the names of the surveys
-names(surveys)
+# variable label
+attr(survey$aim01, "label")
+
+# value labels
+levels(survey$aim01)
 ```
 
-As you can see, the `surveys` list contains three surveys. The first one contains the momentary assessment surveys for each participant, while the second and third ones are the pre- and post-surveys, entry and exit surveys, respectively.
-
-To make things easier, let's assign the surveys to their own objects:
+Real studies usually consist of several surveys (e.g. an entry survey, momentary assessments and an exit survey). With `read_appkit_surveys()` you can read all surveys from a parent directory at once, where each subfolder contains one survey. The result is a named list with one data frame per survey:
 
 ```{r}
-entry <- surveys$entry_survey
-ma <- surveys$momentary_assessment
-exit <- surveys$exit_survey
+surveys_example <- read_appkit_surveys("data/example_surveys")
+names(surveys_example)
+```
+
+If you use different missing value codes, you can change them with the `na_values` argument, e.g. `read_appkit_surveys("data/example_surveys", na_values = c(-1, -99))`.
+
+For the rest of this demo, we use the synthetic example data that comes with `appkitr`. It is based on the study described in the introduction and has the same structure as a survey export read with `read_appkit_surveys()`. The data contain an entry survey, the momentary assessments and an exit survey:
+
+```{r}
+entry <- appkit_survey_entry
+ma <- appkit_survey_esm
+exit <- appkit_survey_exit
 ```
 
 Let's inspect each of the surveys in turn. We will start with the entry survey.
@@ -164,7 +177,7 @@ We can use this metadata to get an overview of who participated in your study on
 table(entry$osVersion, entry$smartphoneType, useNA = "always")
 ```
 
-Looks like we have 2 users on recent versions of Android and 5 iPhone users on iOS 18.3.1. Luckily, we have no hackers running Android on their iPhones in our sample.
+Looks like we have a mix of Android and iPhone users on different operating system versions. Luckily, we have no hackers running Android on their iPhones in our sample.
 
 We can, of course, also visualize this information. Let's create a bar plot showing the number of participants per smartphone type and operating system version.
 
@@ -179,10 +192,10 @@ ggplot(entry, aes(x = osVersion, fill = smartphoneType)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we will rely on a function from our helpers file.
+Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we can use the `inspect_variables()` function from `appkitr`.
 
 ```{r}
-explore_vars(entry)
+inspect_variables(entry)
 ```
 
 We can see that each variable has an assigned label as well as value labels for the response options.
@@ -233,23 +246,21 @@ Looks like we're covering quite a bit of ground!
 
 ## Affect Intensity Measure (AIM)
 
-In the entry survey, we are administering the 20-item version of the [Affect Intensitiy Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 7-point Likert-scale ranging from 1 (never) to 7 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded.
+In the entry survey, we are administering the 20-item version of the [Affect Intensitiy Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 6-point Likert-scale ranging from 1 (never) to 6 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded.
 
 First, lets have a look at the data.
 
 ```{r}
 # processing AIM20 scale https://labs.psychology.illinois.edu/~ediener/AIM.html
-entry[,8:27]
+entry %>% select(matches("^aim[0-9]{2}$"))
 ```
 
 Let's check which questions need to be reverse coded.
 
 ```{r}
 # print question labels of AIM items
-aim_indices <- 8:27 # AIM items are in columns 8 to 27
-
-# Extract aim data
-aim_data <- entry[, aim_indices]
+# Extract aim data (the items aim01 to aim20)
+aim_data <- entry %>% select(matches("^aim[0-9]{2}$"))
 
 sapply(aim_data, function(x) attr(x, "label"))
 ```
@@ -265,7 +276,7 @@ reverse_items <- c(1, 4, 6, 11, 12, 13, 14, 15, 17, 20)
 
 # Reverse code the specified items in a loop
 for (item in reverse_items) {
-  aim_data[, item] <- reverse.code(items = aim_data[, item], keys= -1, mini = 1, maxi = 7)
+  aim_data[, item] <- reverse.code(items = aim_data[, item], keys= -1, mini = 1, maxi = 6)
 }
 ```
 
@@ -289,12 +300,12 @@ summary(entry$aim_score)
 table(entry$aim_score, entry$gender, useNA = "always")
 ```
 
-Unfortunately, some participants did not answer all AIM items, which results in `NA` values in the AIM score, so we're back to one `female` participant.
+Unfortunately, not all participants completed the entry survey, which results in `NA` values in the AIM score (and in `gender` and `age`) for these participants.
 
 Now that we do have an overall score, we can check out some basic plots and differences.
 
 ::: {.alert .alert-warning}
-<strong>Note:</strong> Please keep in mind that the test data set we're working with has \< 10 respondents to give a good overview of the processing steps. The resulting plots and statistics will thus look a bit wonky and are in no way scientifically valid.
+<strong>Note:</strong> Please keep in mind that the test data set we're working with has only 20 participants to give a good overview of the processing steps. The resulting plots and statistics will thus look a bit wonky and are in no way scientifically valid.
 :::
 
 <br>
@@ -363,10 +374,10 @@ ggplot(entry, aes(x = age, y = aim_score)) +
 
 With our insights from the entry survey in mind, we can dive into some descriptive analysis of our momentary assessment survey.
 
-Let's start by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `explore_vars()` function from our helpers file again.
+Let's start by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `inspect_variables()` function again.
 
 ```{r}
-explore_vars(ma)
+inspect_variables(ma)
 ```
 
 As you can see, participants were asked about their interactions with others throughout the day and how they felt about them.
@@ -379,7 +390,7 @@ table(ma$personalParticipantCode, useNA = "always")
 
 We can see that we have a different number of rows per participant, one for each survey that the participant completed. This is because the same momentary assessment survey was sent out at *multiple* random times throughout the day.
 
-Before we begin in with a more detailed analysis of the survey contents, let's assess how many of our participants actually completed the surveys. We know that each participant received 8 surveys per day over a period of 4 days, totaling 32 surveys. We can use the `personalParticipantCode` variable to group the data by participant and then count the number of surveys each participant completed.
+Before we begin in with a more detailed analysis of the survey contents, let's assess how many of our participants actually completed the surveys. We know that each participant received 3 surveys per day over a period of 3 days, totaling 9 surveys. We can use the `personalParticipantCode` variable to group the data by participant and then count the number of surveys each participant completed.
 
 ::: {.alert .alert-warning}
 <strong>Note:</strong> The survey datasets contain only committed responses, meaning that only the surveys that were actually answered by the participants are included in the dataset. This means that we can only count the number of surveys that were answered, not the number of surveys that were scheduled. Please note that this behavior might change in future version of the AppKit.
@@ -390,7 +401,7 @@ Before we begin in with a more detailed analysis of the survey contents, let's a
 ma %>%
   group_by(personalParticipantCode) %>%
   summarise(
-    scheduled = 4*8,
+    scheduled = 3*3,
     committed = sum(!is.na(committed))
   ) %>%
   ungroup() %>%
@@ -401,12 +412,11 @@ ma %>%
   print(n = Inf)
 ```
 
-We can also visualize the completion of the surveys by day to check if the compliance rate was constant or decreased over time. Keep in mind that not all participants started their 4-day survey window on the same day!
+We can also visualize the completion of the surveys by day to check if the compliance rate was constant or decreased over time.
 
 ```{r, fig.height=20, fig.width=8, warning=FALSE, message=FALSE}
 ma %>%
-  mutate(scheduled = dmy_hms(scheduled),
-         scheduled_day = as_date(scheduled)) %>%
+  mutate(scheduled_day = as_date(scheduled)) %>%
   count(scheduled_day, personalParticipantCode) %>%
   ggplot(aes(x = scheduled_day, y = n)) +
   geom_line(linewidth = 1, color = "steelblue") +
@@ -426,16 +436,6 @@ Since the surveys were sent out at random, let's check when the surveys were sen
 First, let's visualize when the surveys were sent out. We will use the `scheduled` variable to plot the distribution of survey times.
 
 ```{r}
-# Convert the time variables to POSIXct
-
-# convert to time variables (note: with_locale is required here to ensure consistent parsing across locales!)
-ma <- ma %>%
-  mutate(
-    scheduled = withr::with_locale(c("LC_TIME" = "C"), as.POSIXct(scheduled, format = "%d-%b-%Y %H:%M:%S")),
-    committed = withr::with_locale(c("LC_TIME" = "C"), as.POSIXct(committed, format = "%d-%b-%Y %H:%M:%S")),
-    published = withr::with_locale(c("LC_TIME" = "C"), as.POSIXct(published, format = "%d-%b-%Y %H:%M:%S"))
-  )
-
 # Create a histogram of the scheduled times
 ggplot(ma, aes(x = scheduled)) +
   geom_histogram(binwidth = 3600, fill = "dodgerblue", color = "black") +
@@ -596,7 +596,7 @@ ma_interaction <- ma %>%
 table(ma_interaction$dataquality, ma_interaction$personalParticipantCode)
 ```
 
-One person seemed to be on a different page, so let's remove these answers from the dataset. We will also remove all other non-conscientious answers, as we are only interested in the conscientious responses.
+Some participants indicated that they did not answer the questions conscientiously, so let's remove these answers from the dataset, as we are only interested in the conscientious responses.
 
 ```{r}
 # remove non-conscientious answers
@@ -641,29 +641,6 @@ ma_interaction %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Seems like one person was in a group of 35000 people, which is quite a lot. Let's check the description of this interaction to see if it was a mistake or an actual interaction.
-
-```{r}
-ma_interaction$description[ma_interaction$groupsize > 1000]
-```
-
-Aha, they were in a stadium with 35000 people, so this is actually a valid interaction. Let's keep it in the dataset, but we can still remove the outliers for the boxplot to get a better overview of the group sizes.
-
-```{r}
-# Group size (excluding outliers)
-
-ma_interaction[ma_interaction$groupsize <= 30,] %>%
-  ggplot(aes(x = personalParticipantCode, y = groupsize)) +
-  geom_boxplot(fill = "skyblue", outlier.color = "red") +
-  labs(
-    title = "Group size Distributions per Participant",
-    x = "Participant Code",
-    y = "Group Size"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
 Lets also check the reported duration of interactions.
 
 ```{r}
@@ -684,15 +661,6 @@ ggplot(ma_interaction, aes(x = personalParticipantCode, fill = duration)) +
 <br>
 
 ## Emotionality
-
-Before we can now have a look at the reported emotional impact of the interactions, we still have to format missing values.
-
-```{r}
-# format non-responses for the emotionality variables
-
-ma_interaction <- ma_interaction %>%
-  mutate(across(14:25, ~ ifelse(. < 0, NA, .)))
-```
 
 Finally, let's check the emotionality of reported social interactions!
 
@@ -805,8 +773,7 @@ emotionality_study <- ma %>%
                              age) %>%
                  rename(`committed_entry_survey` = committed,
                `scheduled_entry_survey` = scheduled,
-               `published_entry_survey` = published,
-               `committed_entry_survey` = committed),
+               `published_entry_survey` = published),
                by = "personalParticipantCode")
 ```
 

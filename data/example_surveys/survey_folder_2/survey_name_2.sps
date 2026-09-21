@@ -1,5 +1,5 @@
 GET DATA /TYPE=TXT
-/FILE='./exit survey.csv'
+/FILE='./survey_name_2.csv'
 /ENCODING='UTF8'
 /ARRANGEMENT=DELIMITED
 /FIRSTCASE=2
@@ -8,11 +8,21 @@ GET DATA /TYPE=TXT
 /DELCASE=LINE
 /VARIABLES=personalParticipantCode A15
 generalLoginCode A15
+status A11
+lastStatusChange A32
+note A500
+firstOpened A32
 committed A32
 scheduled A32
+expired A32
 published A32
+exported A32
 osVersion A15
 smartphoneType A32
+pushNotificationAllowed A15
+notificationType A15
+notificationTitle A50
+notificationText A150
 exit A1000
 paqf1 F1
 paqf2 F1
@@ -39,15 +49,35 @@ VARIABLE LABELS personalParticipantCode 'PersonalParticipantCode'.
 
 VARIABLE LABELS generalLoginCode 'GeneralLoginCode'.
 
+VARIABLE LABELS status 'Participant Status'.
+
+VARIABLE LABELS lastStatusChange 'Last Status Change'.
+
+VARIABLE LABELS note 'Note'.
+
+VARIABLE LABELS firstOpened 'First Opened'.
+
 VARIABLE LABELS committed 'Committed'.
 
 VARIABLE LABELS scheduled 'Scheduled'.
 
+VARIABLE LABELS expired 'Expired'.
+
 VARIABLE LABELS published 'Published'.
+
+VARIABLE LABELS exported 'Exported'.
 
 VARIABLE LABELS osVersion 'OS Version'.
 
 VARIABLE LABELS smartphoneType 'SmartphoneType'.
+
+VARIABLE LABELS pushNotificationAllowed 'Push Notification Allowed'.
+
+VARIABLE LABELS notificationType 'Notification Type'.
+
+VARIABLE LABELS notificationTitle 'Notification Title'.
+
+VARIABLE LABELS notificationText 'Notification Text'.
 
 VARIABLE LABELS exit 'Today was the last day of the study!&nbsp;We thank you very much for participating in our study. You have significantly contributed to our efforts in learning more about the experience of social interactions and in testing new methods to obtain reliable data.&nbsp;If you have conscientiously answered all the questions about interactions you have experienced throughout the last days, we would be very happy if you are willing to provide us with just a little more information about yourself. This will take less than 3 minutes.&nbsp;Would you like to answer a few final questions?'.
 
