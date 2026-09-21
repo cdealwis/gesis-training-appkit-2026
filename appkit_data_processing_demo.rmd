@@ -1,6 +1,7 @@
 ---
-title: "GESIS AppKit Data Export Processing Examples"
+title: "How to work with data from the GESIS AppKit"
 author:
+  - Charlotte de Alwis
   - Maximilian Haag
   - Julian Kohne
 date: "`r Sys.Date()`"
@@ -30,11 +31,11 @@ output:
 
 # Purpose of this notebook
 
-This notebook is intended to make you familiar with processing and analyzing smartphone survey data in `R`. It uses data exported from a demo survey on Emotionality and Social Interaction, which was conducted with the GESIS AppKit 🐿️. The data is available in the `data` folder of this repository.
+This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data based on a real survey conducted with the GESIS AppKit on emotionality in social interactions.
 
-The main goal of this notebook is to make the user familiar with importing, cleaning and inspecting the data. It also includes some basic graphical representations of the data.
+The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. Since [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) is a basic package, the notebook also includes additional code e.g. some basic visualizations.
 
-The notebook is not intended to be a comprehensive guide to smartphone survey data analysis, but rather a starting point for further exploration and analysis.
+You can find more information on the GESIS AppKit and request your own account on the [GESIS AppKit website](http://appkit.gesis.org/).
 
 ------------------------------------------------------------------------
 
@@ -42,17 +43,19 @@ The notebook is not intended to be a comprehensive guide to smartphone survey da
 
 # Introduction
 
-The demo study in this notebook is intended to replicate the findings of the study by [Barrett et al. (2010)](https://doi.org/10.1080/026999398379565) on emotionality and social interaction, which looks at the self-reported emotionality of individuals and differences between men and women. The study's main finding:
+The demo study in this notebook is based on a [preregistered study](https://osf.io/q5maf) consisting of two parts. Part I intends to replicate the findings of the study by [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565), which looks at the self-reported emotionality of individuals and differences by gender, using an ESM design. The study's main finding is:
 
-> We predicted and found that sex-related differences in emotion in global self-descriptions, but not in the averaged momentary ratings of emotion.
+*"We predicted and found that sex-related differences in emotion in global self-descriptions, but not in the averaged momentary ratings of emotion." [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565)*
 
-The study consisted of the following survey:
+Part II is an ESM design experiment: participants were randomly assigned to one of five groups that differ in agency over the scheduling of the prompts (choice-based vs. assigned) and in the number of daily prompts (3 vs. 5), plus a control group that receives no momentary assessments.
 
--   An entry survey distributed to participants after they logged into the study on the AppKit app.
--   A momentary assessment survey that was sent to participants at 8 random times during the day for a period of 4 days.
--   An exit survey that was distributed to participants after momentary assessment period.
+The study consisted of the following surveys:
 
-You can find more information on the GESIS AppKit and request your own account on the [GESIS AppKit website](http://appkit.gesis.org/). You can also find detailed documentation on how to use the AppKit [here](https://appkit.gesis.org/manual/)
+-   An entry survey distributed to participants after they logged into the study on the GESIS Smart app.
+-   A momentary assessment survey that was sent to participants 3 or 5 times during the day for a period of 4 days, plus a short evening survey each day.
+-   An exit survey that was distributed to participants after the momentary assessment period.
+
+Participants were compensated per completed survey, which we will use later to calculate payouts.
 
 ------------------------------------------------------------------------
 
@@ -65,8 +68,6 @@ You can find more information on the GESIS AppKit and request your own account o
 In order to run the code in this notebook, you need to install and load the following packages:
 
 ```{r, include=TRUE, echo=TRUE, output=FALSE, message=TRUE}
-
-
 
 # List of required packages
 packages <- c("ggplot2",
@@ -102,7 +103,7 @@ message("All required packages are now installed and loaded")
 
 ```
 
-We will also load some convenience functions tailored to working with AppKit data. If you want to check out the code, you can find it in the `appkit_helpers.R` file.
+We will also load some convenience functions tailored to working with GESIS AppKit data. If you want to check out the code, you can find it in the `appkit_helpers.R` file.
 
 ```{r, include=TRUE, echo=TRUE, message=FALSE}
 
@@ -180,7 +181,7 @@ The first few variables contain metadata on the participant and their device:
 -   `generalLoginCode` Stores the general login code shared among participants to participate in the study.
 -   `committed` Timestamp indicating when the participant's response was committed.
 -   `scheduled` Timestamp indicating when the survey was scheduled for the participant.
--   `published` Timestamp indicating when the survey was set to published in the AppKit backend.
+-   `published` Timestamp indicating when the survey was set to published in the GESIS AppKit backend.
 -   `osVersion` Holds information about the participant's operating system version.
 -   `smartphoneType` Describes the participant's smartphone or device type
 
@@ -218,7 +219,7 @@ ggplot(entry, aes(x = osVersion, fill = smartphoneType)) +
 
 ```
 
-Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we will rely on a function from our AppKit helpers file.
+Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we will rely on a function from our helpers file.
 
 ```{r}
 
@@ -459,7 +460,7 @@ ggplot(entry, aes(x = age, y = aim_score)) +
 
 With our insights from the entry survey in mind, we can dive into some descriptive analysis of our momentary assessment survey.
 
-Let's start by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `explore_vars()` function from our AppKit helpers file again.
+Let's start by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `explore_vars()` function from our helpers file again.
 
 ```{r}
 
@@ -1144,7 +1145,19 @@ ggplot(participant_summary, aes(x = gender, y = mean_interaction_intensity, fill
 
 We can see that the differences in the mean interaction intensity between participants that we observed in the entry survey vanish in the momentary measure. This is in line with the findings of the original study, which found that there are no significant differences in the momentary ratings of emotion between participants with different genders.
 
-# Other resources
+# Further resources
 
--   The [ESM Preprocessing Gallery](https://preprocess.esmtools.com/) is a great resource for code snippets for working with momentary assessment data maintained by Jordan Revol and colleagues at KU Leuven.
--   Watch out for the `appkit` R package, which is currently in development and will provide a more convenient way to work with AppKit data in R.
+You find detailed documentation on how to use the GESIS AppKit in the [manual](https://appkit.gesis.org/manual/) and on our [website](https://www.gesis.org/gesis-appkit).
+
+**Lectures**
+
+-   Otto, L., & Wieland, M. (2024). *Meet the Experts: Einsatz von Smartphones zur Erforschung von intraindividuellen Prozessen und situativen Dynamiken*. [Video](https://www.youtube.com/watch?v=leKHSTJ5JxI); [Slides](https://www.gesis.org/fileadmin/admin/Dateikatalog/Veranstaltungen/MeetTheExperts/Meet_the_Experts_Wieland_Otto.pdf)
+
+**Guides**
+
+-   Lux, V., & Wieland, M. (2025). *GESIS Guide to Digital Behavioral Data: Aufsetzen und Monitoring von App-basierten Datenerhebungen*. <https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/22_Lux_Wieland_App_Studies.pdf>
+-   de Alwis, C., Lakshmi, V., & Wieland, M. (2026). *GESIS Guide to Digital Behavioral Data: How to use the GESIS AppKit*. <https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf>
+
+**Publications**
+
+-   de Alwis, C., Haag, M., Kohne, J., Otto, L., Schnasse, J., & Wieland, M. (2026). *Introducing the GESIS AppKit: An app-based mobile data collection infrastructure* [Preprint]. SocArXiv. <https://osf.io/preprints/socarxiv/q8v72_v1>
