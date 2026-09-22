@@ -21,10 +21,6 @@ output:
     copy_button: true      
 ---
 
-<br>
-
-------------------------------------------------------------------------
-
 # Purpose of this notebook
 
 This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data modelled after a real survey conducted with the GESIS AppKit on emotionality in social interactions.
@@ -36,10 +32,6 @@ You can find more information on the GESIS AppKit on the [GESIS AppKit website](
 ::: {.alert .alert-warning}
 <strong>Note:</strong> if you open this notebook in an IDE like RStudio, please make sure to set the working directory to the folder where this notebook is located. Otherwise, the code will not work as intended.
 :::
-
-------------------------------------------------------------------------
-
-<br><br><br>
 
 # Background
 
@@ -58,20 +50,16 @@ The study consisted of the following surveys:
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
 ::: {.alert .alert-warning}
-<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to answer the research stated above.
+<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess real research questions.
 :::
 
-------------------------------------------------------------------------
+# Setup
 
-<br><br><br>
-
-# Data processing
-
-## Setup
+## Install and load packages
 
 In order to run the code in this notebook, you need to install and load the following packages. The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package is not yet available on CRAN, so we install it from GitLab using the `remotes` package:
 
-```{r, include=TRUE, echo=TRUE, warning=FALSE, output=FALSE}
+```{r, message=FALSE, warning=FALSE, output=FALSE}
 # List of required packages
 packages <- c("ggplot2",
               "dplyr",
@@ -92,7 +80,7 @@ if (any(installed_packages == FALSE)) {
 invisible(lapply(packages, library, character.only = TRUE))
 ```
 
-```{r}
+```{r, warning=FALSE, output=FALSE}
 # appkitr is not on CRAN yet: install the latest release from GitLab
 if (!require("appkitr", quietly = TRUE)) {
 install.packages("remotes")
@@ -101,7 +89,7 @@ library(appkitr)
 }
 ```
 
-## Importing and auto-formatting data
+## Import data
 
 The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package reads survey exports from the GESIS AppKit and takes care of the formatting for you. An export consists of a `.csv` file with the responses and an `.sps` (SPSS syntax) file with the variable and value labels. `read_appkit_survey()` reads one such survey from a directory, converts timestamps and logical variables, sets specified values (by default `-1`, empty strings, `"Not applicable"` and `"N/A"`) to `NA`, and attaches the labels from the `.sps` file.
 
@@ -119,25 +107,25 @@ names(surveys_example)
 ```
 
 If you use different missing value codes, you can change them with the `na_values` argument, e.g. `read_appkit_surveys("data/example_surveys", na_values = c(-1, -99))`.
-```{r}
+```{r, eval=FALSE}
 ?read_appkit_survey
 ```
 
 
 For the rest of this demo, we use the synthetic example data that comes with `appkitr`.
 
-```{r}
+```{r, echo=FALSE}
 rm(survey, surveys_example)
 ```
 
 
-It is based on the study described in the introduction and has the same structure as a survey export read with `read_appkit_surveys()`.
+It is based on the study described in the introduction. Let's have a look at the documentatio for `appkit_survey_entry`:
 
-```{r}
+```{r, eval=FALSE}
 ?appkit_survey_entry
 ```
 
-The data contain an entry survey, the momentary assessments and an exit survey:
+In addition to an entry survey, the package contains a momentary assessments and exit survey:
 
 ```{r}
 entry <- appkit_survey_entry
@@ -147,10 +135,6 @@ exit <- appkit_survey_exit
 
 Let's inspect each of the surveys in turn. We will start with the entry survey.
 
-------------------------------------------------------------------------
-
-<br><br><br>
-
 # Entry Survey
 
 Let's have a first look:
@@ -159,51 +143,53 @@ Let's have a first look:
 glimpse(entry)
 ```
 
-We can see that the entry survey contains `r NROW(entry)` rows and `r NCOL(entry)` columns. This indicates that there are `r NROW(entry)` participants and `r NCOL(entry)` questions in the entry survey.
+We can see that the entry survey contains `r NROW(entry)` rows and `r NCOL(entry)` columns. This indicates that there are `r NROW(entry)` participants and `r NCOL(entry)` variables in the entry survey. `r 17` of the variables contain metadata about the survey and the participant, where the other `r NCOL(entry)-17` variables contain the survey items defined by the researcher. 
 
-The variable labels are stored as attributes and the value labels as factor levels:
+The first 17 variables contain metadata on the participant and their device, e.g.:
+
+-   `personalParticipantCode` Used to identify the participant in the study.
+-   `generalLoginCode` Stores the general login code.
+-   `status` Participant Status (active, deactivated, deleted).
+-   `lastStatusChange` Timestamp indicating last change of `status`.
+-   `note` Field for an optional researcher note in the participant monitoring table.
+-   `firstOpened` Timestamp indicating when the survey was first opened.
+-   `committed` Timestamp indicating when the participant's response was committed.
+-   `scheduled` Timestamp indicating when the survey was scheduled for the participant.
+-   `expired` Timestamp indicating when the survey expired (if an expiration time was set).
+-   `published` Timestamp indicating when the survey was set to published in the GESIS AppKit backend.
+-   `exported` Timestamp indicating when the survey was exported.
+-   `osVersion` Holds information about the participant's operating system version.
+-   `smartphoneType` Holds information about the participant's smartphone or device type
+-   `pushNotificationAllowed` Logical to capture whether push notifications were allowed or not.
+-   `notificationType` Type of the push notification (default vs. custom).
+-   `notificationTitle` Title of the push notification.
+-   `notificationText` Text of the push notification.
+
+The variable labels are stored as attributes and the value labels as factor levels. Let's have a look at one exemplary variable:
 
 ```{r}
 # variable label
-attr(survey$aim01, "label")
+attr(entry$aim01, "label")
 
 # value labels
-levels(survey$aim01)
+levels(entry$aim01)
 ```
 
-The first few variables contain metadata on the participant and their device, e.g.:
-
--   `personalParticipantCode` Used to identify the participant in the study.
--   `generalLoginCode` Stores the general login code shared among participants to participate in the study.
--   `committed` Timestamp indicating when the participant's response was committed.
--   `scheduled` Timestamp indicating when the survey was scheduled for the participant.
--   `published` Timestamp indicating when the survey was set to published in the GESIS AppKit backend.
--   `osVersion` Holds information about the participant's operating system version.
--   `smartphoneType` Describes the participant's smartphone or device type
-
-We can use this metadata to get an overview of who participated in your study on what devices.
-
-<br>
-
-## Devices and Operating Systems
+We can also use the `inspect_variable()` function from `appkitr`:
 
 ```{r}
-table(entry$osVersion, entry$smartphoneType, useNA = "always")
+inspect_variable(entry$aim01)
 ```
 
-Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we can use the `inspect_variables()` function from `appkitr`.
+To have a look at all the variables in a survey, use `inspect_variables()`:
 
 ```{r}
 inspect_variables(entry)
 ```
 
-We can see that each variable has an assigned label as well as value labels for the response options.
-
-Before we dive in deeper, let's get a good overview of our sample, let's look at some demographics, starting with sex and gender.
-
-<br>
-
 ## Demographics
+
+Now let's look at some demographics:
 
 ```{r}
 # participant gender
@@ -212,11 +198,9 @@ table(entry$gender, useNA = "always")
 # participant sex
 table(entry$sex, useNA = "always")
 
-# Sex by Gender
+# participant sex and gender
 table(entry$gender, entry$sex, useNA = "always")
 ```
-
-In light of the small sample size, let's roll with `gender` as our main variable of interest.
 
 How old are our participants? Let's take a look at the age distribution.
 
@@ -239,22 +223,9 @@ ggplot(entry, aes(x = age)) +
   theme_minimal()
 ```
 
-Looks like we're covering quite a bit of ground!
-
-<br>
-
 ## Affect Intensity Measure (AIM)
 
-In the entry survey, we are administering the 20-item version of the [Affect Intensitiy Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 6-point Likert-scale ranging from 1 (never) to 6 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded.
-
-First, lets have a look at the data.
-
-```{r}
-# processing AIM20 scale https://labs.psychology.illinois.edu/~ediener/AIM.html
-entry %>% select(matches("^aim[0-9]{2}$"))
-```
-
-Let's check which questions need to be reverse coded.
+In the entry survey, we are administering the 20-item version of the [Affect Intensitiy Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 6-point Likert-scale ranging from 1 (never) to 6 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded. So let's check which questions need to be reverse coded.
 
 ```{r}
 # print question labels of AIM items
@@ -299,17 +270,7 @@ summary(entry$aim_score)
 table(entry$aim_score, entry$gender, useNA = "always")
 ```
 
-Unfortunately, not all participants completed the entry survey, which results in `NA` values in the AIM score (and in `gender` and `age`) for these participants.
-
-Now that we do have an overall score, we can check out some basic plots and differences.
-
-::: {.alert .alert-warning}
-<strong>Note:</strong> Please keep in mind that the test data set we're working with has only 20 participants to give a good overview of the processing steps. The resulting plots and statistics will thus look a bit wonky and are in no way scientifically valid.
-:::
-
-<br>
-
-### AIM by Gender
+Now let's have a look at aim by gender:
 
 ```{r, warning=FALSE}
 # Aim score by gender
@@ -323,45 +284,6 @@ ggplot(entry, aes(x = gender, y = aim_score, fill = gender)) +
   theme_minimal() +
   scale_fill_brewer(palette = "Pastel1")
 ```
-
-<br>
-
-### AIM by Sex
-
-```{r, warning=FALSE}
-# Aim score by sex
-by(entry$aim_score, entry$sex, summary)
-
-ggplot(entry, aes(x = sex, y = aim_score, fill = sex)) +
-  geom_boxplot() +
-  labs(title = "Side-by-Side Boxplot of Aim Score by Sex",
-       x = "Sex",
-       y = "Score") +
-  theme_minimal() +
-  scale_fill_brewer(palette = "Pastel1")
-```
-
-<br>
-
-### AIM by Age
-
-```{r, warning=FALSE}
-# Aim score by age
-cor_test_results <- cor.test(entry$age, entry$aim_score)
-print(cor_test_results)
-
-ggplot(entry, aes(x = age, y = aim_score)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(title = "Scatterplot of Age by AIM score",
-       x = "Age",
-       y = "AIM score") +
-  theme_minimal()
-```
-
-------------------------------------------------------------------------
-
-<br><br><br>
 
 # Momentary Assessment Survey
 
@@ -578,7 +500,7 @@ ggplot(aes(x = committed_hour)) +
 
 Let's check the emotionality of interactions from the `ma` dataframe.
 
-<br>
+
 
 ## Removing Data
 
@@ -602,7 +524,6 @@ Some participants indicated that they did not answer the questions conscientious
 ma_interaction <- ma_interaction[ma_interaction$dataquality == "I have answered the questions conscientiously",]
 ```
 
-<br>
 
 ## Interactions
 
@@ -657,7 +578,6 @@ ggplot(ma_interaction, aes(x = personalParticipantCode, fill = duration)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-<br>
 
 ## Emotionality
 
@@ -739,145 +659,12 @@ ma_interaction %>%
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-------------------------------------------------------------------------
 
-<br><br><br>
+# Participation and payout
 
-# Answering our research question
+## Participation across surveys
 
-The question we wanted to investigate / replicate was based on this finding
-
-> We predicted and found that sex-related differences in emotion in global self-descriptions, but not in the averaged momentary ratings of emotion.
-
-After having explored both the global ratings of emotional intensity and the in-situ ratings of emotional intensity for social interactions, we can look at them in combination. To do so, we first need to combine the information from the entry survey (`gender`,`AIM score`) with the information from the momentary assessment (`interaction_intensity`).
-
-```{r}
-# we can combine the information of both dataframes into one
-# dataframe to enable more sophisticated analyses
-# to do so, we need to match the participant IDs and join the
-# values from the entry long dataframe with the esm beeps.
-# colnames(entry) # take over: committed, scheduled, published,
-# aim_score, sex, gender, age
-# colnames(ma) # keep all
-
-# join entry survey
-emotionality_study <- ma %>%
-  left_join(entry %>% select(personalParticipantCode,
-                             committed,
-                             scheduled,
-                             published,
-                             aim_score,
-                             gender,
-                             sex,
-                             age) %>%
-                 rename(`committed_entry_survey` = committed,
-               `scheduled_entry_survey` = scheduled,
-               `published_entry_survey` = published),
-               by = "personalParticipantCode")
-```
-
-<br>
-
-## Global Emotional Intensity
-
-First, let's check the 'global' emotional intensity of our participants, as measured by the AIM scale in the entry survey.
-
-```{r, warning=FALSE}
-# Aim score by gender
-by(emotionality_study$aim_score, emotionality_study$gender, summary)
-
-ggplot(emotionality_study, aes(x = gender,
-                               y = aim_score,
-                               fill = gender)) +
-  geom_boxplot() +
-  labs(title = "Side-by-Side Boxplot of Aim Score by Gender",
-       x = "Gender",
-       y = "Score") +
-  theme_minimal() +
-  scale_fill_brewer(palette = "Pastel1")
-```
-
-As in the original study, we can see that there are differences in the global emotional intensity scores between participants with different gender identities.
-
-<br>
-
-## In-situ Emotional Intensity
-
-Now, let's check the in-situ emotional intensity of our participants, as measured by the `interaction_intensity` variable in the momentary assessment survey.
-
-```{r, warning=FALSE}
-by(emotionality_study$interaction_intensity, emotionality_study$gender, summary)
-
-# overall diff plot
-ggplot(emotionality_study, aes(x = gender, y = as.numeric(interaction_intensity), fill = gender)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("Female" = "lightcoral", "Male" = "lightblue")) +
-  labs(
-    title = "Interaction Intensity by Gender",
-    x = "Gender",
-    y = "Interaction Intensity"
-  ) +
-  theme_minimal()
-```
-
-Note that we have a nested structure of in-situ measurements with surveys nested in days, days nested in participants and participants nested in gender.
-
-To compare male and female participants we need to aggregate the in-situ measurements to the participant level. We can do this by calculating the mean (or median) of the `interaction_intensity` for each participant and then averaging over the averages to generate overall scores.
-
-![](./images/Screenshot2.png)
-
-::: {.alert .alert-warning}
-<strong>Note:</strong> The better option to check data like these are true multilevel modeling approaches. However, these do not make sense with our small demo example.
-:::
-
-In order to compare participants, we will create a summary dataframe that contains the mean interaction intensity (the momentary measurement) for each participant.
-
-```{r}
-participant_summary <- emotionality_study %>%
-  filter(!is.na(interaction_intensity), interaction_intensity != -1) %>%
-  group_by(personalParticipantCode) %>%
-  summarise(
-    mean_interaction_intensity = mean(as.numeric(interaction_intensity), na.rm = TRUE),
-    gender = first(gender),
-    aim_score = first(aim_score)
-  ) %>%
-  ungroup()
-
-participant_summary
-```
-
-Let's check the overall correlation between AIM and in-situ interaction intensitiy.
-
-```{r, warning=FALSE, message = F}
-ggplot(participant_summary, aes(x = aim_score, y = mean_interaction_intensity)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "darkgray") +
-  stat_cor(method = "pearson", label.x = 3, label.y = 4.5) +
-  labs(
-    title = "Correlation between AIM Score and Avg. Interaction Intensity",
-    x = "AIM Score",
-    y = "Mean Interaction Intensity"
-  ) +
-  theme_minimal()
-```
-
-The correlation coefficient between the AIM score and the mean interaction intensity is `r round(cor(participant_summary$aim_score, participant_summary$mean_interaction_intensity, use = "complete.obs"), 2)`, indicating a negative relationship between the two measures. The higher the AIM score, the lower the mean interaction intensity. However, we we can also see that the correlation coefficient is not significant, which means that we cannot conclude that there is a relationship between the two measures in our very small sample with only one participants identifying as `female`.
-
-And finally, let's check the gender differences based on aggregated in-situ measurements.
-
-```{r}
-ggplot(participant_summary, aes(x = gender, y = mean_interaction_intensity, fill = gender)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("Female" = "lightcoral", "Male" = "lightblue")) +
-  labs(
-    title = "Average Interaction Intensity by Gender",
-    x = "Gender",
-    y = "Mean Interaction Intensity"
-  ) +
-  theme_minimal()
-```
-
-We can see that the differences in the mean interaction intensity between participants that we observed in the entry survey vanish in the momentary measure. This is in line with the findings of the original study, which found that there are no significant differences in the momentary ratings of emotion between participants with different genders.
+## Payout calculation
 
 # Further resources
 
