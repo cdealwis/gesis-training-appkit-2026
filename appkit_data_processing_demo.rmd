@@ -50,7 +50,7 @@ The study consisted of the following surveys:
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
 ::: {.alert .alert-warning}
-<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess  the research aims stated above.
+<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess the research aims stated above.
 :::
 
 # Setup
@@ -119,13 +119,13 @@ rm(survey, surveys_example)
 ```
 
 
-It is based on the study described in the introduction. Let's have a look at the documentatio for `appkit_survey_entry`:
+It is based on the study described in the introduction. Let's have a look at the documentation for `appkit_survey_entry`:
 
 ```{r, eval=FALSE}
 ?appkit_survey_entry
 ```
 
-In addition to an entry survey, the package contains a momentary assessments and exit survey:
+In addition to an entry survey, the package contains a momentary assessment survey and an exit survey:
 
 ```{r}
 entry <- appkit_survey_entry
@@ -221,7 +221,7 @@ ggplot(entry, aes(x = age)) +
 
 ## Affect Intensity Measure (AIM)
 
-In the entry survey, we are administering the 20-item version of the [Affect Intensitiy Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 6-point Likert-scale ranging from 1 (never) to 6 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded. So let's check which questions need to be reverse coded.
+In the entry survey, we are administering the 20-item version of the [Affect Intensity Measure (AIM)](https://labs.psychology.illinois.edu/~ediener/AIM.html). The AIM scale is a self-report measure of the intensity of emotional experience. Participants are asked to rate the intensity of their emotional experience on a 6-point Likert-scale ranging from 1 (never) to 6 (always). The AIM scale consists of 20 items, the 10 items representing low emotional intensity are reverse-coded. So let's check which questions need to be reverse coded.
 
 ```{r}
 # print question labels of AIM items
@@ -231,7 +231,7 @@ aim_data <- entry %>% select(matches("^aim[0-9]{2}$"))
 sapply(aim_data, function(x) attr(x, "label"))
 ```
 
-As we can see from, we need to reverse code the following items: `1, 4, 6, 11, 12, 13, 14, 15, 17, 20`. Let's take a look at the data again for these variables and recode them
+As we can see from the labels above, we need to reverse code the following items: `1, 4, 6, 11, 12, 13, 14, 15, 17, 20`. Let's take a look at the data again for these variables and recode them
 
 ```{r}
 # get rid of the labels, keep only numeric values
@@ -290,7 +290,7 @@ inspect_variables(esm)
 
 ## Participation
 
-As you can see, participants were asked about their interactions with others throughout the day and how they felt about them. You can also see that the data structure is different from the entry survey. While the entry dataframe had one row per participant, the momentary assessment dataframe has multiple rows per participant. Lets check this:
+As you can see, participants were asked about their interactions with others throughout the day and how they felt about them. You can also see that the data structure is different from the entry survey. While the entry dataframe had one row per participant, the momentary assessment dataframe has multiple rows per participant. Let's check this:
 
 ```{r}
 table(esm$personalParticipantCode, useNA = "always")
@@ -401,12 +401,12 @@ esm %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-On average, took participants `r round(mean(esm$time_diff/60/60, na.rm = TRUE), 2)` hours to respond to the surveys. The median time difference is `r round(median(esm$time_diff/60/60, na.rm = TRUE), 2)` hours. The maximum time difference is `r round(max(esm$time_diff/60/60, na.rm = TRUE), 2)` hours and the fastest response time was `r round(min(esm$time_diff, na.rm = TRUE), 2)` seconds.
+On average, it took participants `r round(mean(esm$time_diff/60/60, na.rm = TRUE), 2)` hours to respond to the surveys. The median time difference is `r round(median(esm$time_diff/60/60, na.rm = TRUE), 2)` hours. The maximum time difference is `r round(max(esm$time_diff/60/60, na.rm = TRUE), 2)` hours and the fastest response time was `r round(min(esm$time_diff, na.rm = TRUE), 2)` seconds.
 
 
 ## Remove unsuitable observations
 
-First, let's reduce the dataframe to the instances where people actually reported on a social interaction and were people indicated to answer the questions conscientiously.
+First, let's reduce the dataframe to the instances where people actually reported on a social interaction.
 
 ```{r}
 # subset dataframe to only include interactions
@@ -498,7 +498,7 @@ ma_interaction %>%
 
 On average, participants reported interacting with `r round(mean(ma_interaction$groupsize, na.rm = TRUE), 2)` people per interaction (median: `r round(median(ma_interaction$groupsize, na.rm = TRUE), 2)`). Group sizes ranged from `r min(ma_interaction$groupsize, na.rm = TRUE)` to `r max(ma_interaction$groupsize, na.rm = TRUE)` people.
 
-Lets also check the reported duration of interactions.
+Let's also check the reported duration of interactions.
 
 ```{r}
 ggplot(ma_interaction, aes(x = personalParticipantCode, fill = duration)) +
