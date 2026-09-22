@@ -45,7 +45,7 @@ The study consisted of the following surveys:
 
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
-::: {.alert .alert-warning}
+::: {.alert .alert-info}
 <strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess the research aims stated above.
 :::
 
@@ -603,7 +603,7 @@ esm_interaction %>%
 
 The `appkitr` package also includes a function to calculate payout.
 
-::: {.alert .alert-warning}
+::: {.alert .alert-info}
 <strong>Note:</strong> `calculate_payout()` and `create_payout_scheme()` are calculation aids only, with no guarantee of correctness. Always manually verify payout amounts before making any actual payments.
 :::
 
