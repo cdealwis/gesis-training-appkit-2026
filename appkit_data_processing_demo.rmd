@@ -25,7 +25,7 @@ output:
 
 This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data modelled after a real survey conducted with the GESIS AppKit on emotionality in social interactions.
 
-The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. The notebook also includes additional code for some basic calculations and visualizations.
+The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. The notebook also includes additional code for some further basic calculations and visualizations.
 
 You can find more information on the GESIS AppKit on the [GESIS AppKit website](http://appkit.gesis.org/). To request your own account, register [here](https://admin.appkit.gesis.org/login).
 
@@ -84,18 +84,10 @@ library(appkitr)
 }
 ```
 
-## Plot colors
-
-We use a colorblind-friendly, categorical palette (Okabe & Ito, 2008) for all plots in this notebook:
-
-```{r}
-appkit_palette <- c("#0072B2", "#D55E00", "#009E73", "#E69F00",
-                     "#CC79A7", "#56B4E9", "#F0E442", "#999999")
-```
 
 ## Import data
 
-The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package reads survey exports from the GESIS AppKit and takes care of the formatting for you. An export consists of a `.csv` file with the responses and an `.sps` (SPSS syntax) file with the variable and value labels. `read_appkit_survey()` reads one such survey from a directory, converts timestamps and logical variables, sets specified values (by default `-1`, empty strings, `"Not applicable"` and `"N/A"`) to `NA`, and attaches the labels from the `.sps` file.
+The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package includes functions to read survey exports from the GESIS AppKit which take care of the formatting for you. An export consists of a `.csv` file with the responses and an `.sps` (SPSS syntax) file with the variable and value labels. `read_appkit_survey()` reads one such survey from a directory, converts timestamps and logical variables, sets specified values (by default `-1`, empty strings, `"Not applicable"` and `"N/A"`) to `NA`, and attaches the labels from the `.sps` file.
 
 To try this out, the `data/example_survey` folder contains one small example survey:
 
@@ -216,7 +208,7 @@ ggplot(entry, aes(y = age)) +
 
 # histogram
 ggplot(entry, aes(x = age)) + 
-  geom_histogram(binwidth = 1, color = "black", fill = appkit_palette[1]) +
+  geom_histogram(binwidth = 1, color = "black", fill = "#31688E") +
   labs(title = "Participant Age Distribution",
        x = "Participant Age",
        y = "Count") +
@@ -279,7 +271,7 @@ ggplot(entry, aes(x = gender, y = aim_score, fill = gender)) +
        x = "Gender",
        y = "Score") +
   theme_minimal() +
-  scale_fill_manual(values = appkit_palette)
+  scale_fill_viridis_d()
 ```
 
 # Momentary Assessment Survey
@@ -316,7 +308,7 @@ Let's check when the surveys were sent and how long it took participants to resp
 ```{r}
 # Create a histogram of the scheduled times
 ggplot(esm, aes(x = scheduled)) +
-  geom_histogram(binwidth = 3600, fill = appkit_palette[1], color = "black") +
+  geom_histogram(binwidth = 3600, fill = "#31688E", color = "black") +
   labs(title = "Distribution of Scheduled Times",
        x = "Scheduled Time",
        y = "Count") +
@@ -325,7 +317,7 @@ ggplot(esm, aes(x = scheduled)) +
 
 # Create a histogram of the committed times
 ggplot(esm, aes(x = committed)) +
-  geom_histogram(binwidth = 3600, fill = appkit_palette[3], color = "black") +
+  geom_histogram(binwidth = 3600, fill = "#35B779", color = "black") +
   labs(title = "Distribution of Committed Times",
        x = "Committed Time",
        y = "Count") +
@@ -358,9 +350,9 @@ esm %>%
     y = ppt_index - offset, yend = ppt_index + offset
   ), color = "grey", linewidth = 1) +
   geom_point(aes(x = scheduled, y = ppt_index - offset),
-             color = appkit_palette[1], size = 3) +
+             color = "#31688E", size = 3) +
   geom_point(aes(x = committed, y = ppt_index + offset),
-             color = appkit_palette[3], size = 3) +
+             color = "#35B779", size = 3) +
   scale_y_continuous(
     breaks = ppt_map$ppt_index,
     labels = ppt_map$personalParticipantCode
@@ -395,7 +387,7 @@ esm %>%
         mutate(time_diff_min = time_diff / 60) %>%
         mutate(time_diff_hours = time_diff_min / 60) %>%
   ggplot(aes(x = personalParticipantCode, y = time_diff_hours)) +
-  geom_boxplot(fill = appkit_palette[1], outlier.color = appkit_palette[2]) +
+  geom_boxplot(fill = "#31688E", outlier.color = "black") +
   labs(
     title = "Time Difference Distributions per Participant",
     x = "Participant Code",
@@ -420,7 +412,7 @@ esm_interaction <- esm %>%
 
 ```{r, fig.width= 12}
 # How many beeps were answered conscientiously
-table(esm_interaction$dataquality, esm_interaction$personalParticipantCode)
+table(esm_interaction$dataquality)
 ```
 
 Some participants indicated that they did not answer the questions conscientiously, so let's remove these answers from the dataset, as we are only interested in the conscientious responses.
@@ -448,7 +440,7 @@ ggplot(esm_interaction, aes(x = personalParticipantCode, fill = partner_gender))
        x = "Participant Code",
        y = "Share of Interactions",
        fill = "Partner Gender") +
-  scale_fill_manual(values = appkit_palette) +
+  scale_fill_viridis_d() +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -493,7 +485,7 @@ summary(esm_interaction$groupsize, useNA = "never")
 
 esm_interaction %>%
   ggplot(aes(x = personalParticipantCode, y = groupsize)) +
-  geom_boxplot(fill = appkit_palette[1], outlier.color = appkit_palette[2]) +
+  geom_boxplot(fill = "#31688E", outlier.color = "black") +
   labs(
     title = "Group size Distributions per Participant",
     x = "Participant Code",
@@ -514,7 +506,7 @@ ggplot(esm_interaction, aes(x = personalParticipantCode, fill = duration)) +
        x = "Participant Code",
        y = "Share of Interactions",
        fill = "Duration") +
-  scale_fill_manual(values = appkit_palette) +
+  scale_fill_viridis_d() +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -564,7 +556,7 @@ esm_interaction %>%
        x = "Emotion Measure",
        y = "Value") +
   theme_minimal() +
-  scale_fill_manual(values = appkit_palette) +
+  scale_fill_viridis_d() +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
@@ -593,7 +585,7 @@ esm_interaction %>%
        x = "Emotion Measure",
        y = "Value") +
   theme_minimal() +
-  scale_fill_manual(values = appkit_palette) +
+  scale_fill_viridis_d() +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
