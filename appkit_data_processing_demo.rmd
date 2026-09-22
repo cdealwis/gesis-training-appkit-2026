@@ -29,10 +29,6 @@ The main goal of this notebook is to make the user familiar with the `R` package
 
 You can find more information on the GESIS AppKit on the [GESIS AppKit website](http://appkit.gesis.org/). To request your own account, register [here](https://admin.appkit.gesis.org/login).
 
-::: {.alert .alert-warning}
-<strong>Note:</strong> if you open this notebook in an IDE like RStudio, please make sure to set the working directory to the folder where this notebook is located. Otherwise, the code will not work as intended.
-:::
-
 # Background
 
 The demo study in this notebook is based on a [preregistered study](https://osf.io/q5maf) consisting of two parts. Part I intends to replicate the findings of the study by [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565), which looks at self-reported emotionality in interactions and differences by gender, using an ESM design. The study's main finding is:
@@ -64,9 +60,8 @@ In order to run the code in this notebook, you need to install and load the foll
 packages <- c("ggplot2",
               "dplyr",
               "psych",
-              "lubridate",
               "tidyverse",
-              "ggpubr"
+              "scales"
               )
 
 installed_packages <- packages %in% rownames(installed.packages())
@@ -87,6 +82,15 @@ install.packages("remotes")
 remotes::install_gitlab("gesis-appkit/appkitr")
 library(appkitr)
 }
+```
+
+## Plot colors
+
+We use a colorblind-friendly, categorical palette (Okabe & Ito, 2008) for all plots in this notebook:
+
+```{r}
+appkit_palette <- c("#0072B2", "#D55E00", "#009E73", "#E69F00",
+                     "#CC79A7", "#56B4E9", "#F0E442", "#999999")
 ```
 
 ## Import data
@@ -212,7 +216,7 @@ ggplot(entry, aes(y = age)) +
 
 # histogram
 ggplot(entry, aes(x = age)) + 
-  geom_histogram(binwidth = 1, color = "black", fill = "steelblue") +
+  geom_histogram(binwidth = 1, color = "black", fill = appkit_palette[1]) +
   labs(title = "Participant Age Distribution",
        x = "Participant Age",
        y = "Count") +
@@ -275,7 +279,7 @@ ggplot(entry, aes(x = gender, y = aim_score, fill = gender)) +
        x = "Gender",
        y = "Score") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Pastel1")
+  scale_fill_manual(values = appkit_palette)
 ```
 
 # Momentary Assessment Survey
@@ -312,7 +316,7 @@ Let's check when the surveys were sent and how long it took participants to resp
 ```{r}
 # Create a histogram of the scheduled times
 ggplot(esm, aes(x = scheduled)) +
-  geom_histogram(binwidth = 3600, fill = "dodgerblue", color = "black") +
+  geom_histogram(binwidth = 3600, fill = appkit_palette[1], color = "black") +
   labs(title = "Distribution of Scheduled Times",
        x = "Scheduled Time",
        y = "Count") +
@@ -321,7 +325,7 @@ ggplot(esm, aes(x = scheduled)) +
 
 # Create a histogram of the committed times
 ggplot(esm, aes(x = committed)) +
-  geom_histogram(binwidth = 3600, fill = "forestgreen", color = "black") +
+  geom_histogram(binwidth = 3600, fill = appkit_palette[3], color = "black") +
   labs(title = "Distribution of Committed Times",
        x = "Committed Time",
        y = "Count") +
@@ -354,9 +358,9 @@ esm %>%
     y = ppt_index - offset, yend = ppt_index + offset
   ), color = "grey", linewidth = 1) +
   geom_point(aes(x = scheduled, y = ppt_index - offset),
-             color = "blue", size = 3) +
+             color = appkit_palette[1], size = 3) +
   geom_point(aes(x = committed, y = ppt_index + offset),
-             color = "green", size = 3) +
+             color = appkit_palette[3], size = 3) +
   scale_y_continuous(
     breaks = ppt_map$ppt_index,
     labels = ppt_map$personalParticipantCode
@@ -391,7 +395,7 @@ esm %>%
         mutate(time_diff_min = time_diff / 60) %>%
         mutate(time_diff_hours = time_diff_min / 60) %>%
   ggplot(aes(x = personalParticipantCode, y = time_diff_hours)) +
-  geom_boxplot(fill = "skyblue", outlier.color = "red") +
+  geom_boxplot(fill = appkit_palette[1], outlier.color = appkit_palette[2]) +
   labs(
     title = "Time Difference Distributions per Participant",
     x = "Participant Code",
@@ -410,20 +414,20 @@ First, let's reduce the dataframe to the instances where people actually reporte
 
 ```{r}
 # subset dataframe to only include interactions
-ma_interaction <- esm %>%
+esm_interaction <- esm %>%
   filter(screening == TRUE)
 ```
 
 ```{r, fig.width= 12}
 # How many beeps were answered conscientiously
-table(ma_interaction$dataquality, ma_interaction$personalParticipantCode)
+table(esm_interaction$dataquality, esm_interaction$personalParticipantCode)
 ```
 
 Some participants indicated that they did not answer the questions conscientiously, so let's remove these answers from the dataset, as we are only interested in the conscientious responses.
 
 ```{r}
 # remove non-conscientious answers
-ma_interaction <- ma_interaction[ma_interaction$dataquality == "I have answered the questions conscientiously",]
+esm_interaction <- esm_interaction[esm_interaction$dataquality == "I have answered the questions conscientiously",]
 ```
 
 
@@ -433,26 +437,29 @@ Let's first have a look at what kind of interactions participants report on with
 
 ```{r}
 # partner gender
-table(ma_interaction$partner_gender)
-table(ma_interaction$personalParticipantCode, ma_interaction$partner_gender)
-round(prop.table(table(ma_interaction$personalParticipantCode, ma_interaction$partner_gender),margin = 1),2)
+table(esm_interaction$partner_gender)
+table(esm_interaction$personalParticipantCode, esm_interaction$partner_gender)
+round(prop.table(table(esm_interaction$personalParticipantCode, esm_interaction$partner_gender),margin = 1),2)
 
 # Proportional stacked bar per participant
-ggplot(ma_interaction, aes(x = personalParticipantCode, fill = partner_gender)) +
+ggplot(esm_interaction, aes(x = personalParticipantCode, fill = partner_gender)) +
   geom_bar(position = "fill") +
   labs(title = "Share of Interaction Partner Gender by Participant",
        x = "Participant Code",
        y = "Share of Interactions",
        fill = "Partner Gender") +
+  scale_fill_manual(values = appkit_palette) +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 ```{r}
 # join participant's own gender onto each interaction
+esm_interaction <- esm_interaction %>%
+  left_join(entry %>% select(personalParticipantCode, gender), by = "personalParticipantCode")
 
 # harmonize own gender categories
-ma_interaction <- ma_interaction %>%
+esm_interaction <- esm_interaction %>%
   mutate(gender_own_grouped = case_when(
     as.character(gender) == "Female" ~ "Female",
     as.character(gender) == "Male" ~ "Male",
@@ -461,7 +468,7 @@ ma_interaction <- ma_interaction %>%
   ))
 
 # harmonize partner gender categories
-ma_interaction <- ma_interaction %>%
+esm_interaction <- esm_interaction %>%
   mutate(partner_gender_grouped = case_when(
     as.character(partner_gender) == "Female" ~ "Female",
     as.character(partner_gender) == "Male" ~ "Male",
@@ -470,7 +477,7 @@ ma_interaction <- ma_interaction %>%
   ))
 
 # now compare on the harmonized categories
-ma_interaction <- ma_interaction %>%
+esm_interaction <- esm_interaction %>%
   mutate(gender_match = case_when(
     is.na(gender_own_grouped) | is.na(partner_gender_grouped) ~ NA_character_,
     gender_own_grouped == partner_gender_grouped ~ "same",
@@ -478,15 +485,15 @@ ma_interaction <- ma_interaction %>%
   ))
 ```
 
-In total, participants reported on `r nrow(ma_interaction)` interactions. Of these, `r sum(ma_interaction$partner_gender == "female", na.rm = TRUE)` were with women, `r sum(ma_interaction$partner_gender == "male", na.rm = TRUE)` with men, `r sum(ma_interaction$partner_gender == "non-binary", na.rm = TRUE)` with non-binary partners, and `r sum(ma_interaction$partner_gender == "other", na.rm = TRUE)` with partners of another gender. Looking at how this compares to participants' own gender, `r sum(ma_interaction$gender_match == "same", na.rm = TRUE)` interactions were with a partner of the same gender, while `r sum(ma_interaction$gender_match == "different", na.rm = TRUE)` were with a partner of a different gender.
+In total, participants reported on `r nrow(esm_interaction)` interactions. Of these, `r sum(esm_interaction$partner_gender == "Female", na.rm = TRUE)` were with women, `r sum(esm_interaction$partner_gender == "Male", na.rm = TRUE)` with men, `r sum(esm_interaction$partner_gender == "Non-binary", na.rm = TRUE)` with non-binary partners, and `r sum(esm_interaction$partner_gender == "Other", na.rm = TRUE)` with partners of another gender. Looking at how this compares to participants' own gender, `r sum(esm_interaction$gender_match == "same", na.rm = TRUE)` interactions were with a partner of the same gender, while `r sum(esm_interaction$gender_match == "different", na.rm = TRUE)` were with a partner of a different gender.
 
 ```{r}
 # Group size
-summary(ma_interaction$groupsize, useNA = "never")
+summary(esm_interaction$groupsize, useNA = "never")
 
-ma_interaction %>%
+esm_interaction %>%
   ggplot(aes(x = personalParticipantCode, y = groupsize)) +
-  geom_boxplot(fill = "skyblue", outlier.color = "red") +
+  geom_boxplot(fill = appkit_palette[1], outlier.color = appkit_palette[2]) +
   labs(
     title = "Group size Distributions per Participant",
     x = "Participant Code",
@@ -496,23 +503,24 @@ ma_interaction %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-On average, participants reported interacting with `r round(mean(ma_interaction$groupsize, na.rm = TRUE), 2)` people per interaction (median: `r round(median(ma_interaction$groupsize, na.rm = TRUE), 2)`). Group sizes ranged from `r min(ma_interaction$groupsize, na.rm = TRUE)` to `r max(ma_interaction$groupsize, na.rm = TRUE)` people.
+On average, participants reported interacting with `r round(mean(esm_interaction$groupsize, na.rm = TRUE), 2)` people per interaction (median: `r round(median(esm_interaction$groupsize, na.rm = TRUE), 2)`). Group sizes ranged from `r min(esm_interaction$groupsize, na.rm = TRUE)` to `r max(esm_interaction$groupsize, na.rm = TRUE)` people.
 
 Let's also check the reported duration of interactions.
 
 ```{r}
-ggplot(ma_interaction, aes(x = personalParticipantCode, fill = duration)) +
+ggplot(esm_interaction, aes(x = personalParticipantCode, fill = duration)) +
   geom_bar(position = "fill") +
   labs(title = "Share of Interaction Duration by Participant",
        x = "Participant Code",
        y = "Share of Interactions",
        fill = "Duration") +
+  scale_fill_manual(values = appkit_palette) +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Across all `r nrow(ma_interaction)` interactions, the most commonly reported duration was "`r names(sort(table(ma_interaction$duration), decreasing = TRUE))[1]`", accounting for `r round(100 * max(table(ma_interaction$duration)) / sum(table(ma_interaction$duration)), 1)`% of interactions. The least common duration category was "`r names(sort(table(ma_interaction$duration), decreasing = TRUE))[length(table(ma_interaction$duration))]`" (`r round(100 * min(table(ma_interaction$duration)) / sum(table(ma_interaction$duration)), 1)`%).
+Across all `r nrow(esm_interaction)` interactions, the most commonly reported duration was "`r names(sort(table(esm_interaction$duration), decreasing = TRUE))[1]`", accounting for `r round(100 * max(table(esm_interaction$duration)) / sum(table(esm_interaction$duration)), 1)`% of interactions. The least common duration category was "`r names(sort(table(esm_interaction$duration), decreasing = TRUE))[length(table(esm_interaction$duration))]`" (`r round(100 * min(table(esm_interaction$duration)) / sum(table(esm_interaction$duration)), 1)`%).
 
 ## Emotionality
 
@@ -520,7 +528,7 @@ Finally, let's check the emotionality of reported social interactions!
 
 ```{r, warning=FALSE}
 # Emotionality Features
-summary_by_ppt <- ma_interaction %>%
+summary_by_ppt <- esm_interaction %>%
   pivot_longer(
     cols = c(emo_happy,
              emo_sad,
@@ -538,7 +546,7 @@ summary_by_ppt <- ma_interaction %>%
 #print(summary_by_ppt)
 
 # All ppts
-ma_interaction %>%
+esm_interaction %>%
   pivot_longer(
     cols = c(emo_happy,
              emo_sad,
@@ -556,12 +564,12 @@ ma_interaction %>%
        x = "Emotion Measure",
        y = "Value") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set3") +
+  scale_fill_manual(values = appkit_palette) +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 ```{r}
-ma_interaction %>%
+esm_interaction %>%
   filter(gender_own_grouped %in% c("Female", "Male") | is.na(gender_own_grouped)) %>%
   mutate(gender_facet = ifelse(is.na(gender_own_grouped), "NA", gender_own_grouped)) %>%
   group_by(gender_facet) %>%
@@ -585,7 +593,7 @@ ma_interaction %>%
        x = "Emotion Measure",
        y = "Value") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set3") +
+  scale_fill_manual(values = appkit_palette) +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
