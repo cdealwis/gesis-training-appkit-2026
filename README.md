@@ -1,8 +1,10 @@
 # GESIS AppKit data export processing demo
 
+## Purpose 
+
 This repository contains a demo notebook for processing GESIS AppKit data exports in `R`. The demo includes code to read, clean, and analyze survey data exported from the GESIS AppKit. It uses the `appkitr` package when possible. The main content can be found in `appkit_data_processing_demo.Rmd`.
 
-## Preqrequisites
+## Prerequisites
 
 - installed `R` environment on your computer (e.g. `RStudio`)
 - basic `R`, `tidyverse` & `ggplot` knowledge
@@ -19,3 +21,7 @@ This repository contains a demo notebook for processing GESIS AppKit data export
 - Guide to set up a study: [https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf](https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf)
 - GESIS SMART App (Android): [https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1](https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1)
 - GESIS SMART App (iOS): [https://apps.apple.com/de/app/gesis-smart/id6479244351](https://apps.apple.com/de/app/gesis-smart/id6479244351)
+
+## Authors
+
+This tutorial builds on an earlier version written by Julian Kohne for a workshop at GOR 2025. Maximilian Haag revised and extended it for a GESIS Training in 2025 and Charlotte de Alwis prepared the current version for the GESIS Training in 2026.
