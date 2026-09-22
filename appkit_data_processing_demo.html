@@ -2962,7 +2962,7 @@ interactions.</p>
 <code>R</code> package <a href="https://gitlab.com/gesis-appkit/appkitr"><code>appkitr</code></a>
 to read exported surveys, inspect them and to calculate participation
 rates and payout. The notebook also includes additional code for some
-basic calculations and visualizations.</p>
+further basic calculations and visualizations.</p>
 <p>You can find more information on the GESIS AppKit on the <a href="http://appkit.gesis.org/">GESIS AppKit website</a>. To request
 your own account, register <a href="https://admin.appkit.gesis.org/login">here</a>.</p>
 </div>
@@ -2997,7 +2997,8 @@ later to calculate payouts.</p>
 <div class="alert alert-info">
 <p><strong>Note:</strong> this notebook uses synthetic data for
 demonstration purposes. Therefore, this script can not be used to assess
-the research aims stated above.</p>
+these research aims. Note that the synthetic data also does not reflect
+the ESM design experiment described above.</p>
 </div>
 </div>
 <div id="setup" class="section level1" number="3">
@@ -3454,7 +3455,7 @@ take a look at the data again for these variables and recode them</p>
 <span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a>  aim_data[, item] <span class="ot">&lt;-</span> <span class="fu">reverse.code</span>(<span class="at">items =</span> aim_data[, item], <span class="at">keys=</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">mini =</span> <span class="dv">1</span>, <span class="at">maxi =</span> <span class="dv">6</span>)</span>
 <span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a>}</span></code></pre></div>
 <p>Now that we have reverse-coded the correct items, we can calculate
-the overall sum score for the AIM scale.</p>
+the overall mean score for the AIM scale.</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># summary scores</span></span>
 <span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>aim_score <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(aim_data)<span class="sc">/</span><span class="dv">20</span></span>
 <span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a></span>
@@ -3789,75 +3790,12 @@ actually reported on a social interaction.</p>
 <span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a>esm_interaction <span class="ot">&lt;-</span> esm <span class="sc">%&gt;%</span></span>
 <span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a>  <span class="fu">filter</span>(screening <span class="sc">==</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="co"># How many beeps were answered conscientiously</span></span>
-<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a><span class="fu">table</span>(esm_interaction<span class="sc">$</span>dataquality, esm_interaction<span class="sc">$</span>personalParticipantCode)</span></code></pre></div>
-<pre><code>##                                                                                                     
-##                                                                                                      2ypoflt2
-##   I have answered the questions conscientiously                                                             5
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      350f38rb
-##   I have answered the questions conscientiously                                                             6
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      4yrk9gco
-##   I have answered the questions conscientiously                                                             4
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      5islfg00
-##   I have answered the questions conscientiously                                                             5
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      7rspufqi
-##   I have answered the questions conscientiously                                                             3
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      b876dqk5
-##   I have answered the questions conscientiously                                                             6
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      ci862jvm
-##   I have answered the questions conscientiously                                                             3
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      ic4qttj3
-##   I have answered the questions conscientiously                                                             4
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        2
-##                                                                                                     
-##                                                                                                      iityqz6r
-##   I have answered the questions conscientiously                                                             5
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        1
-##                                                                                                     
-##                                                                                                      k8xjbxij
-##   I have answered the questions conscientiously                                                             2
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        1
-##                                                                                                     
-##                                                                                                      kizmrjkh
-##   I have answered the questions conscientiously                                                             1
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        3
-##                                                                                                     
-##                                                                                                      n8cyhsut
-##   I have answered the questions conscientiously                                                             4
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        1
-##                                                                                                     
-##                                                                                                      p5e65m1e
-##   I have answered the questions conscientiously                                                             3
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        1
-##                                                                                                     
-##                                                                                                      q5vq3je8
-##   I have answered the questions conscientiously                                                             1
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      sh28c8is
-##   I have answered the questions conscientiously                                                             2
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      sm6tkhcu
-##   I have answered the questions conscientiously                                                             2
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        0
-##                                                                                                     
-##                                                                                                      u6n4xik4
-##   I have answered the questions conscientiously                                                             4
-##   I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit)        1</code></pre>
+<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a><span class="fu">table</span>(esm_interaction<span class="sc">$</span>dataquality)</span></code></pre></div>
+<pre><code>## 
+##                                                      I have answered the questions conscientiously 
+##                                                                                                 60 
+## I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit) 
+##                                                                                                 10</code></pre>
 <p>Some participants indicated that they did not answer the questions
 conscientiously, so let’s remove these answers from the dataset, as we
 are only interested in the conscientious responses.</p>

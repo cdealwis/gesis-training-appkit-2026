@@ -46,7 +46,7 @@ The study consisted of the following surveys:
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
 ::: {.alert .alert-info}
-<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess the research aims stated above.
+<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess these research aims. Note that the synthetic data also does not reflect the ESM design experiment described above.
 :::
 
 # Setup
@@ -242,7 +242,7 @@ for (item in reverse_items) {
 }
 ```
 
-Now that we have reverse-coded the correct items, we can calculate the overall sum score for the AIM scale.
+Now that we have reverse-coded the correct items, we can calculate the overall mean score for the AIM scale.
 
 ```{r}
 # summary scores
