@@ -4,8 +4,8 @@ This repository contains a demo notebook for processing GESIS AppKit data export
 
 ## Preqrequisites
 
-- installed `R` environment on your computer (e.g. RStudio)
-- basic R, tidyverse & ggplot knowledge
+- installed `R` environment on your computer (e.g. `RStudio`)
+- basic `R`, `tidyverse` & `ggplot` knowledge
 
 ## Additional Materials
 
