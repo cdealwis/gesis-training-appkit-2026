@@ -1,9 +1,9 @@
 ---
 title: "How to work with data from the GESIS AppKit"
 author:
-  - Charlotte de Alwis
-  - Maximilian Haag
-  - Julian Kohne
+- Charlotte de Alwis
+- Maximilian Haag
+- Julian Kohne
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -50,7 +50,7 @@ The study consisted of the following surveys:
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
 ::: {.alert .alert-warning}
-<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess real research questions.
+<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to assess  the research aims stated above.
 :::
 
 # Setup
@@ -129,13 +129,15 @@ In addition to an entry survey, the package contains a momentary assessments and
 
 ```{r}
 entry <- appkit_survey_entry
-ma <- appkit_survey_esm
+esm <- appkit_survey_esm
 exit <- appkit_survey_exit
 ```
 
 Let's inspect each of the surveys in turn. We will start with the entry survey.
 
 # Entry Survey
+
+## Exploration
 
 Let's have a first look:
 
@@ -194,12 +196,6 @@ Now let's look at some demographics:
 ```{r}
 # participant gender
 table(entry$gender, useNA = "always")
-
-# participant sex
-table(entry$sex, useNA = "always")
-
-# participant sex and gender
-table(entry$gender, entry$sex, useNA = "always")
 ```
 
 How old are our participants? Let's take a look at the age distribution.
@@ -265,9 +261,6 @@ Let's take a look at the overall AIM score.
 ```{r}
 # summary of AIM score
 summary(entry$aim_score)
-
-# table of AIM score by gender
-table(entry$aim_score, entry$gender, useNA = "always")
 ```
 
 Now let's have a look at aim by gender:
@@ -287,78 +280,38 @@ ggplot(entry, aes(x = gender, y = aim_score, fill = gender)) +
 
 # Momentary Assessment Survey
 
-::: {.alert .alert-warning}
-<strong>Note:</strong> Some of the plots in this and the following sections will not scale to real life studies with hundreds of participants, but are intended for illustrative purposes of the data and its structure in this particular data example.
-:::
+## Exploration
 
-## Data Quality
-
-With our insights from the entry survey in mind, we can dive into some descriptive analysis of our momentary assessment survey.
-
-Let's start by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `inspect_variables()` function again.
+Let's continue by examining the "main part" of our survey, the momentary assessment survey. We will start by looking at the variables contained in the survey. For this we will use the `inspect_variables()` function again.
 
 ```{r}
-inspect_variables(ma)
+inspect_variables(esm)
 ```
 
-As you can see, participants were asked about their interactions with others throughout the day and how they felt about them.
+## Participation
 
-You can also see that the data structure is different from the entry survey. While the entry dataframe had one row per participant, the momentary assessment dataframe has multiple rows per participant. Lets check this
+As you can see, participants were asked about their interactions with others throughout the day and how they felt about them. You can also see that the data structure is different from the entry survey. While the entry dataframe had one row per participant, the momentary assessment dataframe has multiple rows per participant. Lets check this:
 
 ```{r}
-table(ma$personalParticipantCode, useNA = "always")
+table(esm$personalParticipantCode, useNA = "always")
 ```
 
-We can see that we have a different number of rows per participant, one for each survey that the participant completed. This is because the same momentary assessment survey was sent out at *multiple* random times throughout the day.
+Or simply use the `participation_table` from the `appkitr` package:
 
-Before we begin in with a more detailed analysis of the survey contents, let's assess how many of our participants actually completed the surveys. We know that each participant received 3 surveys per day over a period of 3 days, totaling 9 surveys. We can use the `personalParticipantCode` variable to group the data by participant and then count the number of surveys each participant completed.
-
-::: {.alert .alert-warning}
-<strong>Note:</strong> The survey datasets contain only committed responses, meaning that only the surveys that were actually answered by the participants are included in the dataset. This means that we can only count the number of surveys that were answered, not the number of surveys that were scheduled. Please note that this behavior might change in future version of the AppKit.
-:::
+```{r, eval=FALSE}
+?participation_table
+```
 
 ```{r}
-# Create a table of scheduled and committed surveys per participant
-ma %>%
-  group_by(personalParticipantCode) %>%
-  summarise(
-    scheduled = 3*3,
-    committed = sum(!is.na(committed))
-  ) %>%
-  ungroup() %>%
-  mutate(
-    completion_rate = committed / scheduled * 100
-  ) %>%
-  arrange(desc(completion_rate)) %>%
-  print(n = Inf)
+participation_table(esm)
+participation_table(esm, value = "percentage")
 ```
 
-We can also visualize the completion of the surveys by day to check if the compliance rate was constant or decreased over time.
-
-```{r, fig.height=20, fig.width=8, warning=FALSE, message=FALSE}
-ma %>%
-  mutate(scheduled_day = as_date(scheduled)) %>%
-  count(scheduled_day, personalParticipantCode) %>%
-  ggplot(aes(x = scheduled_day, y = n)) +
-  geom_line(linewidth = 1, color = "steelblue") +
-  geom_point(size = 2, color = "steelblue") +
-  facet_wrap(~ personalParticipantCode, ncol = 1) +
-  scale_y_continuous(limits = c(0, 10), breaks = 0:10) +
-  scale_x_date(date_breaks = "1 day", date_labels = "%d %b") +
-  labs(title = "Entries over time (per participant)",
-       x = "Scheduled date",
-       y = "Number of submitted surveys") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-Since the surveys were sent out at random, let's check when the surveys were sent and how long it took participants to respond.
-
-First, let's visualize when the surveys were sent out. We will use the `scheduled` variable to plot the distribution of survey times.
+Let's check when the surveys were sent and how long it took participants to respond.
 
 ```{r}
 # Create a histogram of the scheduled times
-ggplot(ma, aes(x = scheduled)) +
+ggplot(esm, aes(x = scheduled)) +
   geom_histogram(binwidth = 3600, fill = "dodgerblue", color = "black") +
   labs(title = "Distribution of Scheduled Times",
        x = "Scheduled Time",
@@ -367,7 +320,7 @@ ggplot(ma, aes(x = scheduled)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Create a histogram of the committed times
-ggplot(ma, aes(x = committed)) +
+ggplot(esm, aes(x = committed)) +
   geom_histogram(binwidth = 3600, fill = "forestgreen", color = "black") +
   labs(title = "Distribution of Committed Times",
        x = "Committed Time",
@@ -383,14 +336,14 @@ Seems like the distribution of scheduled and committed times is fairly similar, 
 offset <- 0.2
 
 # create plot
-ma %>%
+esm %>%
   mutate(
     personalParticipantCode = factor(personalParticipantCode),
     ppt_index = as.numeric(personalParticipantCode)
   ) %>%
   distinct(personalParticipantCode, ppt_index) -> ppt_map
 
-ma %>%
+esm %>%
   mutate(
     personalParticipantCode = factor(personalParticipantCode),
     ppt_index = as.numeric(personalParticipantCode)
@@ -429,12 +382,12 @@ We can also calculate time between the scheduled and committed times. This will 
 
 ```{r}
 # Calculate the time difference in seconds
-ma <- ma %>%
+esm <- esm %>%
   mutate(
     time_diff = as.numeric(difftime(committed, scheduled, units = "secs"))
   )
 
-ma %>%
+esm %>%
         mutate(time_diff_min = time_diff / 60) %>%
         mutate(time_diff_hours = time_diff_min / 60) %>%
   ggplot(aes(x = personalParticipantCode, y = time_diff_hours)) +
@@ -448,67 +401,16 @@ ma %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-On average, took participants `r round(mean(ma$time_diff/60/60, na.rm = TRUE), 2)` hours to respond to the surveys. The median time difference is `r round(median(ma$time_diff/60/60, na.rm = TRUE), 2)` hours. The maximum time difference is `r round(max(ma$time_diff/60/60, na.rm = TRUE), 2)` hours and the fastest response time was `r round(min(ma$time_diff, na.rm = TRUE), 2)` seconds.
-
-We can also check the self-indicated time difference of participants from the reported social interaction and answering the survey
-
-```{r}
-# delay
-#table(ma_interaction$personalParticipantCode, ma_interaction$delay)
-#round(prop.table(table(ma_interaction$personalParticipantCode,
-#ma_interaction$delay),margin = 1),2)
-
-ggplot(ma, aes(x = personalParticipantCode, fill = delay)) +
-  geom_bar() +
-  labs(title = "Stacked Bar Graph of Participant Code and Delay",
-       x = "Participant Code",
-       y = "Count") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-Yet, not all responses that were commited include a personal interaction and not all answers were given conscientiously. We can check how many interactions we can analyze by contrasting the `dataquality` variable, which indicates whether the response was given conscientiously, with the `screening` variable, which indicates whether the participant had an interaction with someone else.
-
-```{r}
-# Create a table of data quality and screening
-ma %>%
-  mutate(dataquality = ifelse(as.integer(dataquality) == 1, "Conscientious",
-                              "Not Conscientious")) %>%
-    mutate(screening = ifelse(as.integer(screening) == 1, "Interaction",
-                              "No Interaction")) %>%
-   select(dataquality, screening) %>%
-    table(useNA = "always")
-```
-
-As a last check, we can explore during what time of the day participants were most likely to respond to the surveys. We can do this by extracting the hour from the `committed` variable and plotting the distribution of responses.
-
-```{r}
-ma %>%
-  mutate(
-    committed_hour = factor(format(committed, "%H"), levels = sprintf("%02d", 0:23))
-  ) %>%
-ggplot(aes(x = committed_hour)) +
-  geom_bar(fill = "dodgerblue", color = "black") +
-  labs(
-    title = "Distribution of Committed Hours",
-    x = "Hour of Day",
-    y = "Count"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-Let's check the emotionality of interactions from the `ma` dataframe.
+On average, took participants `r round(mean(esm$time_diff/60/60, na.rm = TRUE), 2)` hours to respond to the surveys. The median time difference is `r round(median(esm$time_diff/60/60, na.rm = TRUE), 2)` hours. The maximum time difference is `r round(max(esm$time_diff/60/60, na.rm = TRUE), 2)` hours and the fastest response time was `r round(min(esm$time_diff, na.rm = TRUE), 2)` seconds.
 
 
-
-## Removing Data
+## Remove unsuitable observations
 
 First, let's reduce the dataframe to the instances where people actually reported on a social interaction and were people indicated to answer the questions conscientiously.
 
 ```{r}
 # subset dataframe to only include interactions
-ma_interaction <- ma %>%
+ma_interaction <- esm %>%
   filter(screening == TRUE)
 ```
 
@@ -535,18 +437,51 @@ table(ma_interaction$partner_gender)
 table(ma_interaction$personalParticipantCode, ma_interaction$partner_gender)
 round(prop.table(table(ma_interaction$personalParticipantCode, ma_interaction$partner_gender),margin = 1),2)
 
+# Proportional stacked bar per participant
 ggplot(ma_interaction, aes(x = personalParticipantCode, fill = partner_gender)) +
-  geom_bar() +
-  labs(title = "Stacked Bar Graph of Participant Code and Partner Gender",
+  geom_bar(position = "fill") +
+  labs(title = "Share of Interaction Partner Gender by Participant",
        x = "Participant Code",
-       y = "Count") +
+       y = "Share of Interactions",
+       fill = "Partner Gender") +
+  scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+```{r}
+# join participant's own gender onto each interaction
+
+# harmonize own gender categories
+ma_interaction <- ma_interaction %>%
+  mutate(gender_own_grouped = case_when(
+    as.character(gender) == "Female" ~ "Female",
+    as.character(gender) == "Male" ~ "Male",
+    as.character(gender) == "Another gender (e.g. non-binary)" ~ "Other/non-binary",
+    TRUE ~ NA_character_
+  ))
+
+# harmonize partner gender categories
+ma_interaction <- ma_interaction %>%
+  mutate(partner_gender_grouped = case_when(
+    as.character(partner_gender) == "Female" ~ "Female",
+    as.character(partner_gender) == "Male" ~ "Male",
+    as.character(partner_gender) %in% c("Non-binary", "Other") ~ "Other/non-binary",
+    TRUE ~ NA_character_
+  ))
+
+# now compare on the harmonized categories
+ma_interaction <- ma_interaction %>%
+  mutate(gender_match = case_when(
+    is.na(gender_own_grouped) | is.na(partner_gender_grouped) ~ NA_character_,
+    gender_own_grouped == partner_gender_grouped ~ "same",
+    TRUE ~ "different"
+  ))
+```
+
+In total, participants reported on `r nrow(ma_interaction)` interactions. Of these, `r sum(ma_interaction$partner_gender == "female", na.rm = TRUE)` were with women, `r sum(ma_interaction$partner_gender == "male", na.rm = TRUE)` with men, `r sum(ma_interaction$partner_gender == "non-binary", na.rm = TRUE)` with non-binary partners, and `r sum(ma_interaction$partner_gender == "other", na.rm = TRUE)` with partners of another gender. Looking at how this compares to participants' own gender, `r sum(ma_interaction$gender_match == "same", na.rm = TRUE)` interactions were with a partner of the same gender, while `r sum(ma_interaction$gender_match == "different", na.rm = TRUE)` were with a partner of a different gender.
 
 ```{r}
 # Group size
-
 summary(ma_interaction$groupsize, useNA = "never")
 
 ma_interaction %>%
@@ -561,60 +496,27 @@ ma_interaction %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+On average, participants reported interacting with `r round(mean(ma_interaction$groupsize, na.rm = TRUE), 2)` people per interaction (median: `r round(median(ma_interaction$groupsize, na.rm = TRUE), 2)`). Group sizes ranged from `r min(ma_interaction$groupsize, na.rm = TRUE)` to `r max(ma_interaction$groupsize, na.rm = TRUE)` people.
+
 Lets also check the reported duration of interactions.
 
 ```{r}
-# duration
-table(ma_interaction$duration, useNA = "no")
-table(ma_interaction$personalParticipantCode, ma_interaction$duration)
-round(prop.table(table(ma_interaction$personalParticipantCode, ma_interaction$duration),margin = 1),2)
-
 ggplot(ma_interaction, aes(x = personalParticipantCode, fill = duration)) +
-  geom_bar() +
-  labs(title = "Stacked Bar Graph of Participant Code and duration",
+  geom_bar(position = "fill") +
+  labs(title = "Share of Interaction Duration by Participant",
        x = "Participant Code",
-       y = "Count") +
+       y = "Share of Interactions",
+       fill = "Duration") +
+  scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+Across all `r nrow(ma_interaction)` interactions, the most commonly reported duration was "`r names(sort(table(ma_interaction$duration), decreasing = TRUE))[1]`", accounting for `r round(100 * max(table(ma_interaction$duration)) / sum(table(ma_interaction$duration)), 1)`% of interactions. The least common duration category was "`r names(sort(table(ma_interaction$duration), decreasing = TRUE))[length(table(ma_interaction$duration))]`" (`r round(100 * min(table(ma_interaction$duration)) / sum(table(ma_interaction$duration)), 1)`%).
 
 ## Emotionality
 
 Finally, let's check the emotionality of reported social interactions!
-
-```{r, warning=FALSE}
-# Interaction Features, grouped by personalParticipantCode
-summary_by_ppt <- ma_interaction %>%
-  pivot_longer(
-    cols = c(interaction_quality,
-             interaction_intimacy,
-             interaction_control,
-             interaction_intensity),
-    names_to = "measure",
-    values_to = "value"
-  ) %>%
-  group_by(personalParticipantCode, measure) %>%
-  summarise(summary_stats = list(summary(value)), .groups = "drop") %>%
-  unnest_wider(summary_stats)
-#print(summary_by_ppt)
-
-# All ppts
-ma_interaction %>%
-  pivot_longer(
-    cols = c(interaction_quality, interaction_intimacy, interaction_control, interaction_intensity),
-    names_to = "measure",
-    values_to = "value"
-  ) %>%
-  ggplot(aes(x = measure, y = value, fill = measure)) +
-  geom_boxplot() +
-  labs(title = "Distribution of Interaction Measures (All Participants)",
-       x = "Measure",
-       y = "Value") +
-  theme_minimal() +
-  scale_fill_brewer(palette = "Set2") +
-  theme(legend.position = "none")
-```
 
 ```{r, warning=FALSE}
 # Emotionality Features
@@ -658,14 +560,72 @@ ma_interaction %>%
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+```{r}
+ma_interaction %>%
+  filter(gender_own_grouped %in% c("Female", "Male") | is.na(gender_own_grouped)) %>%
+  mutate(gender_facet = ifelse(is.na(gender_own_grouped), "NA", gender_own_grouped)) %>%
+  group_by(gender_facet) %>%
+  mutate(gender_facet = paste0(gender_facet, " (n=", n_distinct(personalParticipantCode), ")")) %>%
+  ungroup() %>%
+  pivot_longer(
+    cols = c(emo_happy,
+             emo_sad,
+             emo_nervous,
+             emo_surprise,
+             emo_angry,
+             emo_embarrassed,
+             emo_ashamed),
+    names_to = "measure",
+    values_to = "value"
+  ) %>%
+  ggplot(aes(x = measure, y = value, fill = measure)) +
+  geom_boxplot() +
+  facet_wrap(~ gender_facet) +
+  labs(title = "Distribution of Emotion Measures by Participant Gender",
+       x = "Emotion Measure",
+       y = "Value") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 
-# Participation and payout
+# Payout
 
-## Participation across surveys
+The `appkitr` package also includes a function to calculate payout.
 
-## Payout calculation
+::: {.alert .alert-warning}
+<strong>Note:</strong> `calculate_payout()` and `create_payout_scheme()` are calculation aids only, with no guarantee of correctness. Always manually verify payout amounts before making any actual payments.
+:::
 
+You can either create your payout scheme manually or create the payout scheme in an interactive session:
+
+```{r}
+payout_scheme_manual <- data.frame(
+  survey = c("entry", "esm", "esm"),
+  type = c("per_questionnaire", "per_questionnaire", "threshold"),
+  threshold_n = c(NA, NA, 5),
+  amount = c(1.0, 0.5, 3.0)
+)
+payout_scheme_manual
+```
+
+
+```{r}
+if (interactive()) {
+  if (!exists("payout_scheme_interactive")) {
+    payout_scheme_interactive <- create_payout_scheme(list(entry = entry, esm = esm))
+    print(payout_scheme_interactive)
+  } else {
+    print(payout_scheme_interactive)
+  }
+}
+```
+
+```{r}
+calculate_payout(payout_scheme = payout_scheme_manual, data = list(entry=entry, esm=esm))
+```
 # Further resources
 
 You find detailed documentation on how to use the GESIS AppKit in the [manual](https://appkit.gesis.org/manual/) and on our [website](https://www.gesis.org/gesis-appkit).
