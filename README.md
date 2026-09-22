@@ -19,7 +19,7 @@ Preprint of tool paper: [https://osf.io/preprints/socarxiv/q8v72_v1](https://osf
 
 Manual for the GESIS AppKit: [https://appkit.gesis.org/manual/](https://appkit.gesis.org/manual/)
 
-Guide to set up a study in the GESIS AppKit: [https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf](https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf)
+Guide to set up a study: [https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf](https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf)
 
 GESIS SMART App (Android): [https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1](https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1) 
 
