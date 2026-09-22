@@ -25,25 +25,25 @@ output:
 
 ------------------------------------------------------------------------
 
+# Purpose of this notebook
+
+This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data modelled after a real survey conducted with the GESIS AppKit on emotionality in social interactions.
+
+The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. The notebook also includes additional code for some basic calculations and visualizations.
+
+You can find more information on the GESIS AppKit on the [GESIS AppKit website](http://appkit.gesis.org/). To request your own account, register [here](https://admin.appkit.gesis.org/login).
+
 ::: {.alert .alert-warning}
 <strong>Note:</strong> if you open this notebook in an IDE like RStudio, please make sure to set the working directory to the folder where this notebook is located. Otherwise, the code will not work as intended.
 :::
-
-# Purpose of this notebook
-
-This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data based on a real survey conducted with the GESIS AppKit on emotionality in social interactions.
-
-The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. Since [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) is a basic package, the notebook also includes additional code e.g. some basic visualizations.
-
-You can find more information on the GESIS AppKit and request your own account on the [GESIS AppKit website](http://appkit.gesis.org/).
 
 ------------------------------------------------------------------------
 
 <br><br><br>
 
-# Introduction
+# Background
 
-The demo study in this notebook is based on a [preregistered study](https://osf.io/q5maf) consisting of two parts. Part I intends to replicate the findings of the study by [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565), which looks at the self-reported emotionality of individuals and differences by gender, using an ESM design. The study's main finding is:
+The demo study in this notebook is based on a [preregistered study](https://osf.io/q5maf) consisting of two parts. Part I intends to replicate the findings of the study by [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565), which looks at self-reported emotionality in interactions and differences by gender, using an ESM design. The study's main finding is:
 
 *"We predicted and found that sex-related differences in emotion in global self-descriptions, but not in the averaged momentary ratings of emotion." [Barrett et al. (1998)](https://doi.org/10.1080/026999398379565)*
 
@@ -57,6 +57,10 @@ The study consisted of the following surveys:
 
 Participants were compensated per completed survey, which we will use later to calculate payouts.
 
+::: {.alert .alert-warning}
+<strong>Note:</strong> this notebook uses synthetic data for demonstration purposes. Therefore, this script can not be used to answer the research stated above.
+:::
+
 ------------------------------------------------------------------------
 
 <br><br><br>
@@ -67,41 +71,34 @@ Participants were compensated per completed survey, which we will use later to c
 
 In order to run the code in this notebook, you need to install and load the following packages. The [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package is not yet available on CRAN, so we install it from GitLab using the `remotes` package:
 
-```{r, include=TRUE, echo=TRUE, output=FALSE, message=FALSE, warning=FALSE}
+```{r, include=TRUE, echo=TRUE, warning=FALSE, output=FALSE}
 # List of required packages
 packages <- c("ggplot2",
-              "anytime",
               "dplyr",
               "psych",
-              "corrplot",
-              "cli",
               "lubridate",
               "tidyverse",
-              "ggpubr",
-              "withr")
+              "ggpubr"
+              )
 
-# Check if each package is installed and install if missing
-for (package in packages) {
-  if (!require(package, character.only = TRUE, quietly = TRUE)) {
-    message(paste("Installing package:", package))
-    install.packages(package, repos = "https://cloud.r-project.org/")
-    library(package, character.only = TRUE)
-  } else {
-    message(paste("Package", package, "is already loaded"))
-  }
+installed_packages <- packages %in% rownames(installed.packages())
 
+# Then install missing packages
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
 }
 
-# appkitr is not on CRAN yet: install the latest release from GitLab if missing
+# Then load all packages
+invisible(lapply(packages, library, character.only = TRUE))
+```
+
+```{r}
+# appkitr is not on CRAN yet: install the latest release from GitLab
 if (!require("appkitr", quietly = TRUE)) {
-  if (!require("remotes", quietly = TRUE)) {
-    install.packages("remotes", repos = "https://cloud.r-project.org/")
-  }
-  remotes::install_url("https://gitlab.com/gesis-appkit/appkitr/-/releases/permalink/latest/downloads/appkitr.tar.gz")
-  library(appkitr)
+install.packages("remotes")
+remotes::install_gitlab("gesis-appkit/appkitr")
+library(appkitr)
 }
-
-message("All required packages are now installed and loaded")
 ```
 
 ## Importing and auto-formatting data
@@ -114,16 +111,6 @@ To try this out, the `data/example_survey` folder contains one small example sur
 survey <- read_appkit_survey("data/example_survey")
 ```
 
-The variable labels are stored as attributes and the value labels as factor levels:
-
-```{r}
-# variable label
-attr(survey$aim01, "label")
-
-# value labels
-levels(survey$aim01)
-```
-
 Real studies usually consist of several surveys (e.g. an entry survey, momentary assessments and an exit survey). With `read_appkit_surveys()` you can read all surveys from a parent directory at once, where each subfolder contains one survey. The result is a named list with one data frame per survey:
 
 ```{r}
@@ -132,8 +119,25 @@ names(surveys_example)
 ```
 
 If you use different missing value codes, you can change them with the `na_values` argument, e.g. `read_appkit_surveys("data/example_surveys", na_values = c(-1, -99))`.
+```{r}
+?read_appkit_survey
+```
 
-For the rest of this demo, we use the synthetic example data that comes with `appkitr`. It is based on the study described in the introduction and has the same structure as a survey export read with `read_appkit_surveys()`. The data contain an entry survey, the momentary assessments and an exit survey:
+
+For the rest of this demo, we use the synthetic example data that comes with `appkitr`.
+
+```{r}
+rm(survey, surveys_example)
+```
+
+
+It is based on the study described in the introduction and has the same structure as a survey export read with `read_appkit_surveys()`.
+
+```{r}
+?appkit_survey_entry
+```
+
+The data contain an entry survey, the momentary assessments and an exit survey:
 
 ```{r}
 entry <- appkit_survey_entry
@@ -149,7 +153,7 @@ Let's inspect each of the surveys in turn. We will start with the entry survey.
 
 # Entry Survey
 
-Let's check the contained variables first.
+Let's have a first look:
 
 ```{r}
 glimpse(entry)
@@ -157,7 +161,17 @@ glimpse(entry)
 
 We can see that the entry survey contains `r NROW(entry)` rows and `r NCOL(entry)` columns. This indicates that there are `r NROW(entry)` participants and `r NCOL(entry)` questions in the entry survey.
 
-The first few variables contain metadata on the participant and their device:
+The variable labels are stored as attributes and the value labels as factor levels:
+
+```{r}
+# variable label
+attr(survey$aim01, "label")
+
+# value labels
+levels(survey$aim01)
+```
+
+The first few variables contain metadata on the participant and their device, e.g.:
 
 -   `personalParticipantCode` Used to identify the participant in the study.
 -   `generalLoginCode` Stores the general login code shared among participants to participate in the study.
@@ -175,21 +189,6 @@ We can use this metadata to get an overview of who participated in your study on
 
 ```{r}
 table(entry$osVersion, entry$smartphoneType, useNA = "always")
-```
-
-Looks like we have a mix of Android and iPhone users on different operating system versions. Luckily, we have no hackers running Android on their iPhones in our sample.
-
-We can, of course, also visualize this information. Let's create a bar plot showing the number of participants per smartphone type and operating system version.
-
-```{r}
-ggplot(entry, aes(x = osVersion, fill = smartphoneType)) +
-  geom_bar(position = "dodge") +
-  labs(title = "Operating Systems by Smartphone Type",
-       x = "OS Version",
-       y = "Count",
-       fill = "Smartphone Type") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Now that we've established our participants' mobile computing environment, let's take a look at the other variables contained in our entry survey. For this we can use the `inspect_variables()` function from `appkitr`.
