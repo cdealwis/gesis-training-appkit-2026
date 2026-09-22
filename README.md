@@ -9,13 +9,17 @@ This repository contains a demo notebook for processing GESIS AppKit data export
 
 ## Additional Materials
 
+Login Page for the GESIS AppKit: [https://admin.appkit.gesis.org/login](https://admin.appkit.gesis.org/login)
+
 All information about the GESIS AppKit: [https://www.gesis.org/gesis-appkit](https://www.gesis.org/gesis-appkit)
 
 GESIS AppKit Mailing List: [https://lists.gesis.org/mailman/listinfo/gesis-appkit](https://lists.gesis.org/mailman/listinfo/gesis-appkit)
 
-Manual for the GESIS Appkit: [https://appkit.gesis.org/manual/](https://appkit.gesis.org/manual/)
+Preprint of tool paper: [https://osf.io/preprints/socarxiv/q8v72_v1](https://osf.io/preprints/socarxiv/q8v72_v1)
 
-Login Page for the GESIS AppKit: [https://admin.appkit.gesis.org/login](https://admin.appkit.gesis.org/login)
+Manual for the GESIS AppKit: [https://appkit.gesis.org/manual/](https://appkit.gesis.org/manual/)
+
+Guide to set up a study in the GESIS AppKit: [https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf](https://www.gesis.org/fileadmin/admin/Dateikatalog/pdf/guides/27_de_Alwis_Lakshmi_Wieland_How_to_AppKit.pdf)
 
 GESIS SMART App (Android): [https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1](https://play.google.com/store/apps/details?id=com.surveyAppKit&hl=de&pli=1) 
 
