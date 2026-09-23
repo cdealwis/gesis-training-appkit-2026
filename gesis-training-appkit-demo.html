@@ -4044,16 +4044,15 @@ Figure 11. Distribution of Emotion Measures by Participant Gender
 </div>
 <div id="payout" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Payout</h1>
-<p>The <code>appkitr</code> package also includes a function to
-calculate payout.</p>
 <div class="alert alert-info">
 <p><strong>Note:</strong> <code>calculate_payout()</code> and
 <code>create_payout_scheme()</code> are calculation aids only, with no
 guarantee of correctness. Always manually verify payout amounts before
 making any actual payments.</p>
 </div>
-<p>You can either create your payout scheme manually or create the
-payout scheme in an interactive session:</p>
+<p>The <code>appkitr</code> package also includes a function to
+calculate payout. You can either create your payout scheme manually or
+create the payout scheme in an interactive session:</p>
 <div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a>payout_scheme_manual <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb66-2"><a href="#cb66-2" tabindex="-1"></a>  <span class="at">survey =</span> <span class="fu">c</span>(<span class="st">&quot;entry&quot;</span>, <span class="st">&quot;esm&quot;</span>, <span class="st">&quot;esm&quot;</span>),</span>
 <span id="cb66-3"><a href="#cb66-3" tabindex="-1"></a>  <span class="at">type =</span> <span class="fu">c</span>(<span class="st">&quot;per_questionnaire&quot;</span>, <span class="st">&quot;per_questionnaire&quot;</span>, <span class="st">&quot;threshold&quot;</span>),</span>

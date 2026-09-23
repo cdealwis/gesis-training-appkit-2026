@@ -574,13 +574,11 @@ esm_interaction %>%
 
 # Payout
 
-The `appkitr` package also includes a function to calculate payout.
-
 ::: {.alert .alert-info}
 <strong>Note:</strong> `calculate_payout()` and `create_payout_scheme()` are calculation aids only, with no guarantee of correctness. Always manually verify payout amounts before making any actual payments.
 :::
 
-You can either create your payout scheme manually or create the payout scheme in an interactive session:
+The `appkitr` package also includes a function to calculate payout. You can either create your payout scheme manually or create the payout scheme in an interactive session:
 
 ```{r}
 payout_scheme_manual <- data.frame(
@@ -607,6 +605,7 @@ if (interactive()) {
 ```{r}
 calculate_payout(payout_scheme = payout_scheme_manual, data = list(entry=entry, esm=esm))
 ```
+
 # Further resources
 
 You find detailed documentation on how to use the GESIS AppKit in the [manual](https://appkit.gesis.org/manual/) and on our [website](https://www.gesis.org/gesis-appkit).
