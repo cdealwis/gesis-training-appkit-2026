@@ -3395,60 +3395,104 @@ coded.</p>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="co"># Extract aim data (the items aim01 to aim20)</span></span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>aim_data <span class="ot">&lt;-</span> entry <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">matches</span>(<span class="st">&quot;^aim[0-9]{2}$&quot;</span>))</span>
 <span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="fu">sapply</span>(aim_data, <span class="cf">function</span>(x) <span class="fu">attr</span>(x, <span class="st">&quot;label&quot;</span>))</span></code></pre></div>
-<pre><code>##                                                                                             aim01 
-##                                       &quot;When I feel happiness, it is a quiet type of contentment.&quot; 
-##                                                                                             aim02 
-##         &quot;When a person in a wheelchair can&#39;t get through a door, I have strong feelings of pity.&quot; 
-##                                                                                             aim03 
-##                                                                             &quot;I get upset easily.&quot; 
-##                                                                                             aim04 
-##                                   &quot;When I succeed at something, my reaction is calm contentment.&quot; 
-##                                                                                             aim05 
-##                                                           &quot;I get really happy or really unhappy.&quot; 
-##                                                                                             aim06 
-##                                                                     &quot;I am a fairly quiet person.&quot; 
-##                                                                                             aim07 
-##                                                        &quot;When I&#39;m happy, I feel fairly energetic.&quot; 
-##                                                                                             aim08 
-##  &quot;Seeing a picture of some violent car accident in a newspaper makes me feel sick to my stomach.&quot; 
-##                                                                                             aim09 
-##                                              &quot;When I&#39;m happy, I feel like I&#39;m bursting with joy.&quot; 
-##                                                                                             aim10 
-##                                               &quot;I would be very upset, if I got a traffic ticket.&quot; 
-##                                                                                             aim11 
-##                                     &quot;Looking at beautiful scenery really doesn&#39;t affect me much.&quot; 
-##                                                                                             aim12 
-##                                                             &quot;The weather doesn&#39;t affect my mood.&quot; 
-##                                                                                             aim13 
-##                                                      &quot;Others tend to get more excited than I do.&quot; 
-##                                                                                             aim14 
-##                                                  &quot;I am not an extremely enthusiastic individual.&quot; 
-##                                                                                             aim15 
-##                                                         &quot;Calm and cool could easily describe me.&quot; 
-##                                                                                             aim16 
-## &quot;When I&#39;m feeling well it is easy for me to go from being in a good mood to being really joyful.&quot; 
-##                                                                                             aim17 
-##                                                 &quot;When I worry, it is so mild I hardly notice it.&quot; 
-##                                                                                             aim18 
-##                                                                      &quot;I get overly enthusiastic.&quot; 
-##                                                                                             aim19 
-##                                  &quot;My happy moods are so strong that I feel like I&#39;m &#39;in heaven&#39;.&quot; 
-##                                                                                             aim20 
-##                              &quot;When something bad happens, others tend to be more unhappy than I.&quot;</code></pre>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="fu">inspect_variables</span>(aim_data)</span></code></pre></div>
+<pre><code>## 
+## ── Variable Inspector ────────────────────────────────────────────────────────── 
+## 
+## aim01 (factor): When I feel happiness, it is a quiet type of contentment. 
+##   Unique values:  Occasionally, Usually, Almost always, Never, Alway... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim02 (factor): When a person in a wheelchair can&#39;t get through a door, I have strong feelings of pity. 
+##   Unique values:  Usually, Never, Almost never, Occasionally, Always 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim03 (factor): I get upset easily. 
+##   Unique values:  Always, Occasionally, Almost always, Usually, Almo... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim04 (factor): When I succeed at something, my reaction is calm contentment. 
+##   Unique values:  Almost never, Occasionally, Never, Usually, Almost... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim05 (factor): I get really happy or really unhappy. 
+##   Unique values:  Never, Usually, Occasionally, Almost never, Always... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim06 (factor): I am a fairly quiet person. 
+##   Unique values:  Never, Almost always, Always, Occasionally, Usuall... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim07 (factor): When I&#39;m happy, I feel fairly energetic. 
+##   Unique values:  Usually, Almost never, Never, Occasionally, Almost... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim08 (factor): Seeing a picture of some violent car accident in a newspaper makes me feel sick to my stomach. 
+##   Unique values:  Almost never, Usually, Occasionally, Almost always... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim09 (factor): When I&#39;m happy, I feel like I&#39;m bursting with joy. 
+##   Unique values:  Usually, Occasionally, Never, Always, Almost never... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim10 (factor): I would be very upset, if I got a traffic ticket. 
+##   Unique values:  Almost never, Usually, Always, Occasionally, Almos... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim11 (factor): Looking at beautiful scenery really doesn&#39;t affect me much. 
+##   Unique values:  Always, Never, Usually, Occasionally, Almost never... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim12 (factor): The weather doesn&#39;t affect my mood. 
+##   Unique values:  Always, Occasionally, Almost never, Usually, Almos... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim13 (factor): Others tend to get more excited than I do. 
+##   Unique values:  Always, Usually, Occasionally, Never, Almost never 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim14 (factor): I am not an extremely enthusiastic individual. 
+##   Unique values:  Almost never, Almost always, Always, Occasionally,... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim15 (factor): Calm and cool could easily describe me. 
+##   Unique values:  Occasionally, Usually, Never, Always, Almost never... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim16 (factor): When I&#39;m feeling well it is easy for me to go from being in a good mood to being really joyful. 
+##   Unique values:  Occasionally, Almost never, Always, Almost always,... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim17 (factor): When I worry, it is so mild I hardly notice it. 
+##   Unique values:  Occasionally, Usually, Always, Never, Almost alway... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim18 (factor): I get overly enthusiastic. 
+##   Unique values:  Always, Usually, Almost never, Occasionally, Never... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim19 (factor): My happy moods are so strong that I feel like I&#39;m &#39;in heaven&#39;. 
+##   Unique values:  Never, Always, Almost never, Almost always, Occasi... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## ──────────────────────────────────────────────────────────────────────────────── 
+## aim20 (factor): When something bad happens, others tend to be more unhappy than I. 
+##   Unique values:  Occasionally, Usually, Almost never, Almost always... 
+##   Value labels:  1 = Never, 2 = Almost never, 3 = Occasionally, 4 =... 
+## 
+##  ────────────────────────────────────────────────────────────────────────────────</code></pre>
 <p>As we can see from the labels above, we need to reverse code the
 following items: <code>1, 4, 6, 11, 12, 13, 14, 15, 17, 20</code>. Let’s
 take a look at the data again for these variables and recode them</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># get rid of the labels, keep only numeric values</span></span>
-<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>aim_data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(aim_data,as.numeric)</span>
-<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="co"># reverse-coding items (columns 1,4,6,11,12,13,14,15,17,20)</span></span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>reverse_items <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">15</span>, <span class="dv">17</span>, <span class="dv">20</span>)</span>
-<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a></span>
-<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a><span class="co"># Reverse code the specified items in a loop</span></span>
-<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a><span class="cf">for</span> (item <span class="cf">in</span> reverse_items) {</span>
-<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>  aim_data[, item] <span class="ot">&lt;-</span> <span class="fu">reverse.code</span>(<span class="at">items =</span> aim_data[, item], <span class="at">keys=</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">mini =</span> <span class="dv">1</span>, <span class="at">maxi =</span> <span class="dv">6</span>)</span>
-<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>aim_data <span class="ot">&lt;-</span> aim_data <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), as.numeric))</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="co"># reverse-coding items (columns 1,4,6,11,12,13,14,15,17,20)</span></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>reverse_items <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;aim01&quot;</span>, <span class="st">&quot;aim04&quot;</span>, <span class="st">&quot;aim06&quot;</span>, <span class="st">&quot;aim11&quot;</span>, <span class="st">&quot;aim12&quot;</span>, <span class="st">&quot;aim13&quot;</span>, <span class="st">&quot;aim14&quot;</span>, <span class="st">&quot;aim15&quot;</span>, <span class="st">&quot;aim17&quot;</span>, <span class="st">&quot;aim20&quot;</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a><span class="co"># Reverse code the specified items</span></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>aim_data <span class="ot">&lt;-</span> aim_data <span class="sc">%&gt;%</span></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(reverse_items), <span class="sc">~</span> <span class="fu">reverse.code</span>(<span class="at">items =</span> .x, <span class="at">keys =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">mini =</span> <span class="dv">1</span>, <span class="at">maxi =</span> <span class="dv">6</span>)))</span></code></pre></div>
 <p>Now that we have reverse-coded the correct items, we can calculate
 the overall mean score for the AIM scale.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="co"># summary scores</span></span>
@@ -3815,7 +3859,8 @@ are only interested in the conscientious responses.</p>
 ## I did not answer the questions conscientiously (since I only want to get to know the GESIS AppKit) 
 ##                                                                                                 10</code></pre>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="co"># remove non-conscientious answers</span></span>
-<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a>esm_interaction <span class="ot">&lt;-</span> esm_interaction[esm_interaction<span class="sc">$</span>dataquality <span class="sc">==</span> <span class="st">&quot;I have answered the questions conscientiously&quot;</span>,]</span></code></pre></div>
+<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a>esm_interaction <span class="ot">&lt;-</span> esm_interaction <span class="sc">%&gt;%</span></span>
+<span id="cb51-3"><a href="#cb51-3" tabindex="-1"></a>  <span class="fu">filter</span>(dataquality <span class="sc">==</span> <span class="st">&quot;I have answered the questions conscientiously&quot;</span>)</span></code></pre></div>
 </div>
 <div id="interactions" class="section level2" number="5.4">
 <h2><span class="header-section-number">5.4</span> Interactions</h2>

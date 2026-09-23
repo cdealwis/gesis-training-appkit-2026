@@ -216,22 +216,22 @@ In the entry survey, we are administering the 20-item version of the [Affect Int
 # Extract aim data (the items aim01 to aim20)
 aim_data <- entry %>% select(matches("^aim[0-9]{2}$"))
 
-sapply(aim_data, function(x) attr(x, "label"))
+inspect_variables(aim_data)
 ```
 
 As we can see from the labels above, we need to reverse code the following items: `1, 4, 6, 11, 12, 13, 14, 15, 17, 20`. Let's take a look at the data again for these variables and recode them
 
 ```{r}
 # get rid of the labels, keep only numeric values
-aim_data <- sapply(aim_data,as.numeric)
+aim_data <- aim_data %>%
+  mutate(across(everything(), as.numeric))
 
 # reverse-coding items (columns 1,4,6,11,12,13,14,15,17,20)
-reverse_items <- c(1, 4, 6, 11, 12, 13, 14, 15, 17, 20)
+reverse_items <- c("aim01", "aim04", "aim06", "aim11", "aim12", "aim13", "aim14", "aim15", "aim17", "aim20")
 
-# Reverse code the specified items in a loop
-for (item in reverse_items) {
-  aim_data[, item] <- reverse.code(items = aim_data[, item], keys= -1, mini = 1, maxi = 6)
-}
+# Reverse code the specified items
+aim_data <- aim_data %>%
+  mutate(across(all_of(reverse_items), ~ reverse.code(items = .x, keys = -1, mini = 1, maxi = 6)))
 ```
 
 Now that we have reverse-coded the correct items, we can calculate the overall mean score for the AIM scale.
@@ -405,7 +405,8 @@ table(esm_interaction$dataquality)
 ```
 ```{r}
 # remove non-conscientious answers
-esm_interaction <- esm_interaction[esm_interaction$dataquality == "I have answered the questions conscientiously",]
+esm_interaction <- esm_interaction %>%
+  filter(dataquality == "I have answered the questions conscientiously")
 ```
 
 
