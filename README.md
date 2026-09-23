@@ -25,3 +25,5 @@ This repository contains a demo notebook for processing GESIS AppKit data export
 ## Authors
 
 This tutorial builds on an earlier version written by Julian Kohne for a workshop at GOR 2025. Maximilian Haag revised and extended it for a GESIS Training in 2025 and Charlotte de Alwis prepared the current version for the GESIS Training in 2026.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cdealwis/gesis-training-appkit-2026/master?urlpath=rstudio)
