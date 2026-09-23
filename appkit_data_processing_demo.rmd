@@ -23,7 +23,7 @@ output:
 
 # Purpose of this notebook
 
-This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data modelled after a real survey conducted with the GESIS AppKit on emotionality in social interactions.
+This notebook is intended to make you familiar with processing and analyzing smartphone survey data collected with the GESIS AppKit in `R`, using the [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) package where appropriate. It uses synthetic example data modeled after a real survey conducted with the GESIS AppKit on emotionality in social interactions.
 
 The main goal of this notebook is to make the user familiar with the `R` package [`appkitr`](https://gitlab.com/gesis-appkit/appkitr) to read exported surveys, inspect them and to calculate participation rates and payout. The notebook also includes additional code for some further basic calculations and visualizations.
 
@@ -196,14 +196,8 @@ table(entry$gender, useNA = "always")
 
 How old are our participants? Let's take a look at the age distribution.
 
-```{r, fig.cap=c("Figure 1. Participant Age Boxplot", "Figure 2. Participant Age Distribution")}
+```{r, fig.cap=c("Figure 1. Participant Age Distribution")}
 summary(entry$age)
-
-#boxplot
-ggplot(entry, aes(y = age)) +
-  geom_boxplot() +
-  labs(y = "Participant Age") +
-  theme_minimal()
 
 # histogram
 ggplot(entry, aes(x = age)) + 
@@ -259,7 +253,7 @@ summary(entry$aim_score)
 
 Now let's have a look at aim by gender:
 
-```{r, warning=FALSE, fig.cap="Figure 3. Side-by-Side Boxplot of Aim Score by Gender"}
+```{r, warning=FALSE, fig.cap="Figure 2. Side-by-Side Boxplot of Aim Score by Gender"}
 # Aim score by gender
 by(entry$aim_score, entry$gender, summary)
 
@@ -302,7 +296,7 @@ participation_table(esm, value = "percentage")
 
 Let's check when the surveys were sent and how long it took participants to respond.
 
-```{r, fig.cap=c("Figure 4. Distribution of Scheduled Beeps", "Figure 5. Distribution of Committed Beeps")}
+```{r, fig.cap=c("Figure 3. Distribution of Scheduled Beeps", "Figure 4. Distribution of Committed Beeps")}
 # Create a histogram of the scheduled times
 ggplot(esm, aes(x = scheduled)) +
   geom_histogram(binwidth = 3600, fill = "#31688E", color = "black") +
@@ -322,7 +316,7 @@ ggplot(esm, aes(x = committed)) +
 
 Seems like the distribution of scheduled and committed times is fairly similar, but we can't really tell from these plots, maybe we need a more advanced graphical representation.
 
-```{r, fig.cap="Figure 6. Scheduled and Committed Beeps per Participant"}
+```{r, fig.cap="Figure 5. Scheduled and Committed Beeps per Participant"}
 # Define a small vertical offset.
 offset <- 0.2
 
@@ -370,7 +364,7 @@ esm %>%
 
 We can also calculate time between the scheduled and committed times. This will give us a pretty good idea of how long it took participants to respond to the surveys on average.
 
-```{r, fig.cap="Figure 7. Time Lag Distributions per Participant"}
+```{r, fig.cap="Figure 6. Time Lag Distributions per Participant"}
 # Calculate the time difference in seconds
 esm <- esm %>%
   mutate(
@@ -403,13 +397,12 @@ esm_interaction <- esm %>%
   filter(screening == TRUE)
 ```
 
+Some participants indicated that they did not answer the questions conscientiously, so let's remove these answers from the dataset, as we are only interested in the conscientious responses.
+
 ```{r, fig.width= 12}
 # How many beeps were answered conscientiously
 table(esm_interaction$dataquality)
 ```
-
-Some participants indicated that they did not answer the questions conscientiously, so let's remove these answers from the dataset, as we are only interested in the conscientious responses.
-
 ```{r}
 # remove non-conscientious answers
 esm_interaction <- esm_interaction[esm_interaction$dataquality == "I have answered the questions conscientiously",]
@@ -420,7 +413,7 @@ esm_interaction <- esm_interaction[esm_interaction$dataquality == "I have answer
 
 Let's first have a look at what kind of interactions participants report on with respect to group sizes and interaction partner gender.
 
-```{r, fig.cap="Figure 8. Share of Interaction Partner Gender by Participant"}
+```{r, fig.cap="Figure 7. Share of Interaction Partner Gender by Participant"}
 # partner gender
 table(esm_interaction$partner_gender)
 table(esm_interaction$personalParticipantCode, esm_interaction$partner_gender)
@@ -471,7 +464,7 @@ esm_interaction <- esm_interaction %>%
 
 In total, participants reported on `r nrow(esm_interaction)` interactions. Of these, `r sum(esm_interaction$partner_gender == "Female", na.rm = TRUE)` were with women, `r sum(esm_interaction$partner_gender == "Male", na.rm = TRUE)` with men, `r sum(esm_interaction$partner_gender == "Non-binary", na.rm = TRUE)` with non-binary partners, and `r sum(esm_interaction$partner_gender == "Other", na.rm = TRUE)` with partners of another gender. Looking at how this compares to participants' own gender, `r sum(esm_interaction$gender_match == "same", na.rm = TRUE)` interactions were with a partner of the same gender, while `r sum(esm_interaction$gender_match == "different", na.rm = TRUE)` were with a partner of a different gender.
 
-```{r, fig.cap="Figure 9. Group size Distributions per Participant"}
+```{r, fig.cap="Figure 8. Group size Distributions per Participant"}
 # Group size
 summary(esm_interaction$groupsize, useNA = "never")
 
@@ -490,7 +483,7 @@ On average, participants reported interacting with `r round(mean(esm_interaction
 
 Let's also check the reported duration of interactions.
 
-```{r, fig.cap="Figure 10. Share of Interaction Duration by Participant"}
+```{r, fig.cap="Figure 9. Share of Interaction Duration by Participant"}
 ggplot(esm_interaction, aes(x = personalParticipantCode, fill = duration)) +
   geom_bar(position = "fill") +
   labs(x = "Participant Code",
@@ -508,7 +501,7 @@ Across all `r nrow(esm_interaction)` interactions, the most commonly reported du
 
 Finally, let's check the emotionality of reported social interactions!
 
-```{r, warning=FALSE, fig.cap="Figure 11. Distribution of Emotion Measures (All Participants)"}
+```{r, warning=FALSE, fig.cap="Figure 10. Distribution of Emotion Measures (All Participants)"}
 # Emotionality Features
 summary_by_ppt <- esm_interaction %>%
   pivot_longer(
@@ -549,7 +542,7 @@ esm_interaction %>%
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-```{r, fig.cap="Figure 12. Distribution of Emotion Measures by Participant Gender"}
+```{r, fig.cap="Figure 11. Distribution of Emotion Measures by Participant Gender"}
 esm_interaction %>%
   filter(gender_own_grouped %in% c("Female", "Male") | is.na(gender_own_grouped)) %>%
   mutate(gender_facet = ifelse(is.na(gender_own_grouped), "NA", gender_own_grouped)) %>%
