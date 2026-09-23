@@ -1,4 +1,4 @@
-# Demo for working with GESIS AppKit export data
+# Demo for working with GESIS AppKit data
 
 ## Purpose 
 
