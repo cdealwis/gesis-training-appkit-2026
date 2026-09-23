@@ -321,12 +321,12 @@ Seems like the distribution of scheduled and committed times is fairly similar, 
 offset <- 0.2
 
 # create plot
-esm %>%
+ppt_map <- esm %>%
   mutate(
     personalParticipantCode = factor(personalParticipantCode),
     ppt_index = as.numeric(personalParticipantCode)
   ) %>%
-  distinct(personalParticipantCode, ppt_index) -> ppt_map
+  distinct(personalParticipantCode, ppt_index)
 
 esm %>%
   mutate(

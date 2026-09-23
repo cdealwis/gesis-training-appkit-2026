@@ -3714,12 +3714,12 @@ a more advanced graphical representation.</p>
 <span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a>offset <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
 <span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a></span>
 <span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a><span class="co"># create plot</span></span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>esm <span class="sc">%&gt;%</span></span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>ppt_map <span class="ot">&lt;-</span> esm <span class="sc">%&gt;%</span></span>
 <span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb43-7"><a href="#cb43-7" tabindex="-1"></a>    <span class="at">personalParticipantCode =</span> <span class="fu">factor</span>(personalParticipantCode),</span>
 <span id="cb43-8"><a href="#cb43-8" tabindex="-1"></a>    <span class="at">ppt_index =</span> <span class="fu">as.numeric</span>(personalParticipantCode)</span>
 <span id="cb43-9"><a href="#cb43-9" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb43-10"><a href="#cb43-10" tabindex="-1"></a>  <span class="fu">distinct</span>(personalParticipantCode, ppt_index) <span class="ot">-&gt;</span> ppt_map</span>
+<span id="cb43-10"><a href="#cb43-10" tabindex="-1"></a>  <span class="fu">distinct</span>(personalParticipantCode, ppt_index)</span>
 <span id="cb43-11"><a href="#cb43-11" tabindex="-1"></a></span>
 <span id="cb43-12"><a href="#cb43-12" tabindex="-1"></a>esm <span class="sc">%&gt;%</span></span>
 <span id="cb43-13"><a href="#cb43-13" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
